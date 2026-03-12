@@ -1,3 +1,11 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/letsmg/erp-vue-laravel/output/pacman-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/letsmg/erp-vue-laravel/output/pacman.svg">
+  <img alt="pacman contribution graph" src="https://raw.githubusercontent.com/letsmg/erp-vue-laravel/output/pacman.svg">
+</picture>
+
+
+
 # 🌌 ERP Vue Laravel — Gestão Inteligente
 > Sistema de gestão empresarial (ERP) moderno, focado em alta performance, segurança robusta e experiência do desenvolvedor (DX).
 
@@ -132,3 +140,11 @@ ______________________________________
 <p align="center">
    &copy; 2026 — Desenvolvido com foco em escalabilidade.
 </p>
+
+
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/letsmg/erp-vue-laravel/output/snake-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/letsmg/erp-vue-laravel/output/snake.svg">
+  <img alt="snake animation" src="https://raw.githubusercontent.com/letsmg/erp-vue-laravel/output/snake.svg">
+</picture>
