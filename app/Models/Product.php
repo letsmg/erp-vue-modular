@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Product extends Model
@@ -14,25 +15,30 @@ class Product extends Model
         'collection', 'gender', 'cost_price', 'sale_price', 
         'promo_price', 'promo_start_at', 'promo_end_at',
         'barcode', 'stock_quantity', 'is_active', 'is_featured',
-        'slug', 'images'
+        'slug'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
-        'images' => 'json',
         'promo_start_at' => 'datetime',
         'promo_end_at' => 'datetime',
     ];
+
+    // Faz o current_price aparecer automaticamente no Vue/Inertia
+    protected $appends = ['current_price'];
 
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    /**
-     * Relacionamento Polimórfico de SEO
-     */
+    public function images(): HasMany
+    {
+        // Ordena por 'order' se você tiver esse campo, para as fotos não embaralharem
+        return $this->hasMany(ProductImage::class)->orderBy('id', 'asc');
+    }
+
     public function seo(): MorphOne
     {
         return $this->morphOne(SeoMetadata::class, 'seoable');
@@ -51,9 +57,9 @@ class Product extends Model
         $now = now();
         if ($this->promo_price && $this->promo_start_at && $this->promo_end_at) {
             if ($now->between($this->promo_start_at, $this->promo_end_at)) {
-                return $this->promo_price;
+                return (float) $this->promo_price;
             }
         }
-        return $this->sale_price;
+        return (float) $this->sale_price;
     }
 }

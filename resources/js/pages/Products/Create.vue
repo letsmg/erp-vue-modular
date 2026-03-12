@@ -5,7 +5,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { fillFormData, clearFormData } from '@/lib/utils';
 import { 
     Save, ArrowLeft, DollarSign, 
-    Star, Percent, Keyboard
+    Star, Percent, Keyboard, Camera, X 
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -13,6 +13,7 @@ const props = defineProps({
 });
 
 const activeTab = ref('geral');
+const imagePreviews = ref([]); // Gerencia os URLs temporários das fotos
 
 const form = useForm({
     // Geral
@@ -28,6 +29,9 @@ const form = useForm({
     is_active: true,
     is_featured: false,
     
+    // Fotos
+    images: [],
+
     // Preços e Promoção
     cost_price: 0,
     sale_price: 0,
@@ -40,17 +44,34 @@ const form = useForm({
     meta_description: '',
 });
 
-// Listener de Atalhos (Padrão Ctrl + Shift)
-const handleKeydown = (e) => {
-    // Verificamos se o usuário não está dentro de um campo de texto (opcional, mas seguro)
-    // Se quiser que funcione mesmo dentro de inputs, mantenha como está.
+// Lógica de Upload de Imagens
+const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    
+    if (form.images.length + files.length > 6) {
+        alert('Você pode enviar no máximo 6 fotos por produto.');
+        return;
+    }
 
+    files.forEach(file => {
+        form.images.push(file);
+        imagePreviews.value.push(URL.createObjectURL(file));
+    });
+};
+
+const removeImage = (index) => {
+    form.images.splice(index, 1);
+    imagePreviews.value.splice(index, 1);
+};
+
+// Listener de Atalhos
+const handleKeydown = (e) => {
     const isP = e.key.toLowerCase() === 'p';
     const isL = e.key.toLowerCase() === 'l';
 
     if (e.ctrlKey && e.shiftKey && isP) {
         e.preventDefault();
-        e.stopPropagation(); // Garante que o navegador não use o atalho dele
+        e.stopPropagation();
         fillFormData(form, props.suppliers);
     }
 
@@ -58,13 +79,13 @@ const handleKeydown = (e) => {
         e.preventDefault();
         e.stopPropagation();
         clearFormData(form);
+        imagePreviews.value = [];
     }
 };
 
 onMounted(() => window.addEventListener('keydown', handleKeydown));
 onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
 
-// Cálculo de Lucro reativo
 const profitData = computed(() => {
     const cost = parseFloat(form.cost_price) || 0;
     const sale = parseFloat(form.sale_price) || 0;
@@ -79,7 +100,11 @@ const profitData = computed(() => {
 const submit = () => {
     form.post(route('products.store'), {
         preserveScroll: true,
-        onSuccess: () => form.reset(),
+        forceFormData: true, // Necessário para envio de arquivos
+        onSuccess: () => {
+            form.reset();
+            imagePreviews.value = [];
+        },
     });
 };
 </script>
@@ -118,17 +143,35 @@ const submit = () => {
             </div>
 
             <div v-if="Object.keys(form.errors).length" class="mb-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
-    <p class="text-xs font-black text-red-600 uppercase mb-2">Erros de Validação:</p>
-    <ul class="list-disc ml-4 tracking-tight">
-        <li v-for="(error, field) in form.errors" :key="field" class="text-[10px] text-red-500 font-bold uppercase">
-            {{ field }}: {{ error }}
-        </li>
-    </ul>
-</div>
+                <p class="text-xs font-black text-red-600 uppercase mb-2">Erros de Validação:</p>
+                <ul class="list-disc ml-4 tracking-tight">
+                    <li v-for="(error, field) in form.errors" :key="field" class="text-[10px] text-red-500 font-bold uppercase">
+                        {{ field }}: {{ error }}
+                    </li>
+                </ul>
+            </div>
 
             <form @submit.prevent="submit" class="space-y-6">
                 
-                <div v-show="activeTab === 'geral'" class="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div v-show="activeTab === 'geral'" class="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-4">Fotos do Produto (Máx 6)</label>
+                        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                            <div v-for="(src, index) in imagePreviews" :key="index" class="relative group aspect-square rounded-2xl overflow-hidden border border-gray-100">
+                                <img :src="src" class="w-full h-full object-cover" />
+                                <button type="button" @click="removeImage(index)" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition">
+                                    <X class="w-3 h-3" />
+                                </button>
+                            </div>
+
+                            <label v-if="form.images.length < 6" class="aspect-square border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition group">
+                                <Camera class="w-6 h-6 text-gray-300 group-hover:text-indigo-500 transition" />
+                                <span class="text-[8px] font-black uppercase text-gray-400 mt-2">Adicionar</span>
+                                <input type="file" class="hidden" multiple accept="image/*" @change="handleImageUpload" />
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Descrição do Produto</label>

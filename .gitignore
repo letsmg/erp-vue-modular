@@ -28,8 +28,10 @@ yarn-error.log
 docker-compose.override.yml
 user.ini
 .DS_Store
-
-
+/app/Http/Controllers/Private/
+/resources/js/Pages/Private/
+/routes/private.php
+google-credentials.json
 
 
 

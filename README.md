@@ -72,8 +72,41 @@ SEO & Vitrine: Tabela de produtos inclui campos de slug, seo_title e seo_keyword
 
 UX Reativa: Busca em tempo real (Debounce Search) no módulo de fornecedores.
 
-📦 Módulos Implementados
+________________________________
 
+🚀 Funcionalidades Extra:
+
+Moderação de Imagens via IA: O sistema está preparado para integrar com Google Cloud Vision. Se detectar conteúdo impróprio, o upload é bloqueado automaticamente.
+
+Caso você decida usar deve seguir esses passos:
+
+1. Você precisa criar um projeto no Google Cloud Console:
+
+2. Acesse o Google Cloud Console.
+
+3. Crie um novo projeto (ex: "ERP-Sistema").
+
+4. No menu lateral, vá em APIs e Serviços > Biblioteca.
+
+5. Procure por "Cloud Vision API" e clique em Ativar.
+
+6. Depois de ativa, vá em APIs e Serviços > Credenciais.
+
+7. Clique em Criar Credenciais > Chave de conta de serviço.
+
+8. Escolha um nome, e no papel (role), coloque Proprietário ou Cloud Vision AI > Usuário.
+
+9. Ao final, ele vai baixar automaticamente um arquivo JSON para o seu computador.
+
+10. SALVE O ARQUIVO COM A API NA RAIZ DO PROJETO COM O NOME
+
+**google-credentials.json**
+
+______________________________________
+
+
+
+📦 Módulos Implementados
 
 
 <ul>

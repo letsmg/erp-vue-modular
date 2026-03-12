@@ -5,7 +5,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { clearFormData } from '@/lib/utils';
 import { 
     Save, ArrowLeft, DollarSign, 
-    Star, Percent, Keyboard
+    Star, Percent, Keyboard, Camera, X
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -14,9 +14,11 @@ const props = defineProps({
 });
 
 const activeTab = ref('geral');
+const newImagePreviews = ref([]); // Previews apenas das novas fotos selecionadas
 
 // Inicializa o formulário com os dados existentes
 const form = useForm({
+    _method: 'PUT', // Necessário para o Laravel processar arquivos em rotas de update
     supplier_id: props.product.supplier_id,
     description: props.product.description,
     brand: props.product.brand,
@@ -29,6 +31,10 @@ const form = useForm({
     is_active: Boolean(props.product.is_active),
     is_featured: Boolean(props.product.is_featured),
     
+    // Fotos
+    existing_images: [...props.product.images], // Fotos que já estão no servidor
+    new_images: [], // Novos arquivos que serão submetidos
+
     cost_price: props.product.cost_price,
     sale_price: props.product.sale_price,
     promo_price: props.product.promo_price,
@@ -40,10 +46,40 @@ const form = useForm({
     meta_keywords: props.product.seo?.meta_keywords || '',
 });
 
+// Lógica de Upload de Novas Fotos
+const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const totalCurrent = form.existing_images.length + form.new_images.length;
+    
+    if (totalCurrent + files.length > 6) {
+        alert('O limite máximo é de 6 fotos por produto.');
+        return;
+    }
+
+    files.forEach(file => {
+        form.new_images.push(file);
+        newImagePreviews.value.push(URL.createObjectURL(file));
+    });
+};
+
+// Remover foto que já existe no servidor (ID será enviado para o backend saber quais manter)
+const removeExistingImage = (index) => {
+    form.existing_images.splice(index, 1);
+};
+
+// Remover nova foto da fila de upload
+const removeNewImage = (index) => {
+    form.new_images.splice(index, 1);
+    newImagePreviews.value.splice(index, 1);
+};
+
 const handleKeydown = (e) => {
     if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'l') {
         e.preventDefault();
-        if(confirm('Limpar campos?')) clearFormData(form);
+        if(confirm('Limpar campos?')) {
+            clearFormData(form);
+            newImagePreviews.value = [];
+        }
     }
 };
 
@@ -62,7 +98,12 @@ const profitData = computed(() => {
 });
 
 const submit = () => {
-    form.put(route('products.update', props.product.id));
+    // IMPORTANTE: Usamos .post com _method: PUT porque multipart/form-data (arquivos) 
+    // não funciona nativamente com o método PUT do PHP/Laravel em alguns ambientes.
+    form.post(route('products.update', props.product.id), {
+        forceFormData: true,
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -86,11 +127,40 @@ const submit = () => {
                 </div>
             </div>
 
-            
-
             <form @submit.prevent="submit" class="space-y-6">
                 
-                <div v-show="activeTab === 'geral'" class="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div v-show="activeTab === 'geral'" class="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-6">
+                    
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-4 tracking-wider">Galeria do Produto (Máx 6)</label>
+                        <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                            
+                            <div v-for="(img, index) in form.existing_images" :key="'old-'+img.id" class="relative group aspect-square rounded-2xl overflow-hidden border border-gray-100">
+                                <img :src="'/storage/' + img.path" class="w-full h-full object-cover" />
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <button type="button" @click="removeExistingImage(index)" class="bg-white text-red-600 p-2 rounded-full shadow-lg hover:scale-110 transition">
+                                        <X class="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <span class="absolute bottom-1 left-1 bg-black/50 text-[8px] text-white px-2 py-0.5 rounded-full uppercase font-black">Salva</span>
+                            </div>
+
+                            <div v-for="(src, index) in newImagePreviews" :key="'new-'+index" class="relative group aspect-square rounded-2xl overflow-hidden border-2 border-indigo-100">
+                                <img :src="src" class="w-full h-full object-cover" />
+                                <button type="button" @click="removeNewImage(index)" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full shadow-md">
+                                    <X class="w-3 h-3" />
+                                </button>
+                                <span class="absolute bottom-1 left-1 bg-indigo-600 text-[8px] text-white px-2 py-0.5 rounded-full uppercase font-black">Nova</span>
+                            </div>
+
+                            <label v-if="(form.existing_images.length + form.new_images.length) < 6" class="aspect-square border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 hover:border-indigo-200 transition group">
+                                <Camera class="w-6 h-6 text-gray-300 group-hover:text-indigo-500 transition" />
+                                <span class="text-[8px] font-black uppercase text-gray-400 mt-2">Adicionar</span>
+                                <input type="file" class="hidden" multiple accept="image/*" @change="handleImageUpload" />
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-[10px] font-black uppercase text-gray-400 mb-2">Descrição do Produto</label>
@@ -176,7 +246,7 @@ const submit = () => {
                                 </div>
                             </div>
                             <div :class="['w-12 h-6 rounded-full transition-colors relative border border-amber-200', form.is_featured ? 'bg-amber-500' : 'bg-white']">
-                                <div :class="['w-4 h-4 bg-white rounded-full absolute top-1 transition-all', form.is_featured ? 'left-7' : 'left-1']"></div>
+                                <div :class="['w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm', form.is_featured ? 'left-7' : 'left-1']"></div>
                             </div>
                         </div>
 
@@ -197,6 +267,7 @@ const submit = () => {
                     <Link :href="route('products.index')" class="text-[10px] font-black uppercase text-gray-400 hover:text-gray-600 transition tracking-[0.2em]">Descartar</Link>
                     <button type="submit" :disabled="form.processing" class="bg-black text-white px-12 py-5 rounded-3xl font-black uppercase text-[10px] tracking-[0.3em] shadow-2xl hover:bg-indigo-600 transition-all flex items-center gap-3">
                         <Save v-if="!form.processing" class="w-4 h-4" />
+                        <span v-else class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
                         {{ form.processing ? 'Processando' : 'Atualizar Dados' }}
                     </button>
                 </div>
