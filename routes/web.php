@@ -4,51 +4,42 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductController;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StoreController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-
-// --- ROTAS PÚBLICAS (Visitantes) ---
-Route::middleware('guest')->group(function () {
-    Route::get('/', [LoginController::class, 'showLogin'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-});
+// 1. VITRINE (Pública para todos)
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
-// --- ROTAS PROTEGIDAS (Usuários Autenticados) ---
+// 2. AUTENTICAÇÃO (Apenas para quem não está logado)
+Route::middleware('guest')->group(function () {
+    Route::get('/', [StoreController::class, 'index'])->name('store.index');
+    Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+    Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+});
+
+// 3. PAINEL ADMINISTRATIVO (Protegido por login)
 Route::middleware(['auth'])->group(function () {
     
-    // Dashboard Principal
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
-
-    // Logout (Sempre POST por segurança)
+    // Dashboard e Logout
+    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::resource('products', ProductController::class);        
-        
+    // Gerenciamento (Agora protegidos!)
+    Route::resource('products', ProductController::class);
     Route::resource('suppliers', SupplierController::class);
     
+    // Relatórios
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/products', [ReportController::class, 'products'])->name('reports.products');
 
-    // --- ÁREA DO ADMINISTRADOR ---
+    // 4. ÁREA DO SUPER-ADMIN (Protegido por login + middleware de Admin)
     Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
-        
-        // CRUD de Usuários completo
         Route::resource('users', UserController::class);
-        
-        // Rota específica para o Reset de Senha (Esqueci minha senha via Admin)
         Route::patch('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset');
-        
-        
-
-        //altera outros usuarios entre ativo e inativo, mas não pode alterar o status do proprio usuario
-        Route::patch('/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle');          
+        Route::patch('/users/{user}/toggle', [UserController::class, 'toggleStatus'])->name('users.toggle');
     });
-
 });
