@@ -35,7 +35,7 @@ export default defineConfig({
     },
     build: {
         // Ativa a minificação pesada para o servidor
-        minify: 'terser', 
+        minify: 'esbuild', 
         sourcemap: false, // Deixa o build mais leve no servidor
         chunkSizeWarningLimit: 1600,
         rollupOptions: {
