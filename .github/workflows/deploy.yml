@@ -1,24 +1,55 @@
-name: 🚀 Deploy Laravel
+# name: 🚀 Deploy Laravel
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: 📥 Clonar repositório
+#         uses: actions/checkout@v4
+
+#       - name: 🔑 Configurar SSH
+#         uses: webfactory/ssh-agent@v0.8.0
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+#       - name: 🚀 Executar deploy no servidor
+
+name: 🚀 CI and Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  deploy:
+  test: # JOB DE TESTES
     runs-on: ubuntu-latest
-
     steps:
-      - name: 📥 Clonar repositório
-        uses: actions/checkout@v4
-
-      - name: 🔑 Configurar SSH
-        uses: webfactory/ssh-agent@v0.8.0
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          php-version: '8.3'
+      - name: Install PHP deps
+        run: composer install --no-interaction --prefer-dist
+      - name: Run Tests
+        run: php artisan test
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
 
+  deploy: # JOB DE DEPLOY
+    needs: test # <--- ISSO AQUI É A CHAVE! O deploy só roda se o test passar.
+    runs-on: ubuntu-latest
+    steps:
       - name: 🚀 Executar deploy no servidor
+
+
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@147.15.80.52 << 'EOF'
             
