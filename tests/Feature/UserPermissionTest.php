@@ -64,23 +64,30 @@ class UserPermissionTest extends TestCase
     {
         $admin = User::factory()->create(['access_level' => 1]);
         
+        $senhaForte = 'Senha@Forte123'; // Atende a todas as suas regras do Controller
+
         $novoUsuario = [
             'name' => 'Clone',
             'email' => 'clone@teste.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123', // Adicione a confirmação!
-            'access_level' => 0
+            'password' => $senhaForte,
+            'password_confirmation' => $senhaForte, // Resolve o 'confirmed'
+            'access_level' => 0,
+            'is_active' => true, // Resolve o 'required' do seu controller
         ];
 
         $response = $this->actingAs($admin)->post(route('users.store'), $novoUsuario);
 
-        // Se houver erro de validação, isso vai mostrar o que aconteceu no terminal:
+        // Se falhar, o dump abaixo vai te mostrar o erro de validação exato
         if ($response->status() !== 302) {
-            dump($response->json() ?? 'Erro de validação ou permissão');
+            dump($response->getSession()->get('errors')->getMessages());
         }
 
-        $response->assertRedirect();
-        $this->assertDatabaseHas('users', ['email' => 'clone@teste.com']);
+        $response->assertRedirect(route('users.index'));
+        
+        $this->assertDatabaseHas('users', [
+            'email' => 'clone@teste.com',
+            'is_active' => 1 // No SQLite, true vira 1
+        ]);
     }
 
     public function test_usuario_comum_nao_pode_deletar_ninguem()

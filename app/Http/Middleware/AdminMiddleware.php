@@ -23,4 +23,14 @@ class AdminMiddleware
         // Isso fará o teste de assertStatus(403) passar!
         abort(403, 'Acesso negado.');
     }
+
+    //era assim
+    // public function handle(Request $request, Closure $next)
+    // {
+    //     if (auth()->check() && auth()->user()->access_level === 1) {
+    //         return $next($request);
+    //     }
+
+    //     return redirect('/dashboard')->with('error', 'Acesso negado.');
+    // }
 }
