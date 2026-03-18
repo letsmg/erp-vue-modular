@@ -14,7 +14,20 @@ class UserPermissionTest extends TestCase
     {
         parent::setUp();
         // Alimenta o banco (SQLite em memória) com seus Seeders antes de cada teste
-        $this->seed();
+        //$this->seed();
+    }
+
+    public function test_admin_pode_acessar_dashboard()
+    {
+        // Em vez de rodar seeder, cria o admin apenas para este teste
+        $admin = User::factory()->create([
+            'access_level' => 1,
+            'is_active' => true
+        ]);
+
+        $response = $this->actingAs($admin)->get('/dashboard');
+
+        $response->assertStatus(200);
     }
 
     /** --- TESTES DE ACESSO E LOGIN --- **/
