@@ -60,6 +60,11 @@ export const fillFormData = (form: any, suppliers: any[] = []) => {
 
     const fakeData: Record<string, any> = {
         // ... (mantenha os campos de fornecedor e básicos iguais)
+        name: () => {
+            const nomes = ['João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lucas'];
+            const sobrenomes = ['Silva', 'Souza', 'Oliveira', 'Costa', 'Pereira'];
+            return `${nomes[Math.floor(Math.random()*nomes.length)]} ${sobrenomes[Math.floor(Math.random()*sobrenomes.length)]}`;
+        },
         company_name: () => "Empresa Teste " + Math.random().toString(36).substring(7).toUpperCase(),
         email: () => `teste_${Math.random().toString(36).substring(5)}@zenite.com`,        
         cnpj: () => "42.123.456/0001-99",

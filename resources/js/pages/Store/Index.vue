@@ -13,7 +13,6 @@ const props = defineProps({
     brands: Array
 });
 
-// AQUI ESTÁ A MÁGICA: O search real vem daqui!
 const { search, minPrice, maxPrice, brand } = useStoreIndex(props);
 
 // Lógica do Modal
@@ -21,7 +20,7 @@ const isModalOpen = ref(false);
 const selectedProduct = ref(null);
 const openDetails = (p) => { selectedProduct.value = p; isModalOpen.value = true; };
 
-// Lógica do Carousel (Idêntica à sua antiga)
+// Lógica do Carousel
 let timer = null;
 const scroll = (id, direction) => {
     const el = document.getElementById(id);
@@ -82,6 +81,21 @@ onUnmounted(() => clearInterval(timer));
             </aside>
 
             <section class="flex-1 flex flex-col">
+                
+                <div v-if="products.links?.length > 3" class="mb-10 flex justify-center flex-wrap gap-2">
+                    <Link 
+                        v-for="(link, k) in products.links" :key="k"
+                        :href="link.url || '#'"
+                        v-html="link.label"
+                        class="px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all duration-300 border"
+                        :class="{
+                            'bg-slate-900 text-white border-slate-900 shadow-lg': link.active,
+                            'bg-white text-slate-400 border-slate-100 hover:bg-slate-50': !link.active,
+                            'opacity-30 cursor-not-allowed': !link.url
+                        }"
+                    />
+                </div>
+
                 <div v-if="products.data?.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     <div v-for="product in products.data" :key="product.id" 
                          @click="openDetails(product)"
@@ -93,8 +107,23 @@ onUnmounted(() => clearInterval(timer));
                         <p class="text-xl font-black text-indigo-600 mt-2 font-mono">R$ {{ product.sale_price }}</p>
                     </div>
                 </div>
+
                 <div v-else class="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
                     <p class="text-slate-400 font-bold uppercase tracking-widest">Nenhum produto encontrado</p>
+                </div>
+
+                <div v-if="products.links?.length > 3" class="mt-16 flex justify-center flex-wrap gap-2">
+                    <Link 
+                        v-for="(link, k) in products.links" :key="'bottom-'+k"
+                        :href="link.url || '#'"
+                        v-html="link.label"
+                        class="px-5 py-3 rounded-2xl text-xs font-black uppercase transition-all duration-300 border"
+                        :class="{
+                            'bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-100': link.active,
+                            'bg-white text-slate-500 border-slate-100 hover:border-indigo-200 hover:text-indigo-600': !link.active,
+                            'opacity-30 cursor-not-allowed': !link.url
+                        }"
+                    />
                 </div>
             </section>
         </main>

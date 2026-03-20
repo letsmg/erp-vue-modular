@@ -31,7 +31,15 @@ return new class extends Migration {
             $table->string('slug')->unique();
             $table->json('images')->nullable(); 
             $table->timestamps();
+
+            $table->index('supplier_id');
+            $table->index('is_active');
+            $table->index('is_featured');
+            $table->index('created_at');
+            $table->fullText(['description', 'brand', 'model']);
         });
+
+        
     }
     public function down(): void { Schema::dropIfExists('products'); }
 };

@@ -4,43 +4,37 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use App\Services\AuthService;
 use Inertia\Inertia;
-use App\Mail\RecuperarSenhaMail;
-use Illuminate\Support\Facades\Mail;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use Illuminate\Http\RedirectResponse;
 
 class LoginController extends Controller
 {
-    public function showLogin() {
+    protected AuthService $service;
+
+    public function __construct(AuthService $service)
+    {
+        $this->service = $service;
+    }
+
+    public function showLogin()
+    {
         return Inertia::render('Auth/Login');
     }
 
-    public function showRegister() {
+    public function showRegister()
+    {
         return Inertia::render('Auth/Register');
     }
 
-    public function register(Request $request) {
-        $data = $request->validate([
-            'name' => 'required|string|max:150',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed', // Validação de 6 chars e confirmação
-        ]);
-
-        User::create($data);
-        return redirect()->route('login')->with('success', 'Cadastro realizado!');
-    }
-
-    public function login(Request $request)
+    public function login(LoginRequest $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $credentials = $request->validated();
 
-        // Tentamos o login com o adicional do is_active
-        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password'], 'is_active' => true], $request->remember)) {
-            $request->session()->regenerate();
+        if ($this->service->login($credentials, $request->boolean('remember'))) {
             return redirect()->intended('/dashboard');
         }
 
@@ -49,66 +43,40 @@ class LoginController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function register(RegisterRequest $request): RedirectResponse
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $data = $request->validated();
 
-        if (Auth::attempt($credentials, $request->remember)) {
-            $request->session()->regenerate();
+        $this->service->register($data);
 
-            // Redireciona para o Dashboard
-            return redirect()->intended('/dashboard');
-        }
-
-        // Se falhar, retorna com erro de validação
-        return back()->withErrors([
-            'email' => 'As credenciais não coincidem com nossos registros.',
-        ])->onlyInput('email');
+        return redirect()->route('login')
+            ->with('success', 'Cadastro realizado!');
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
-        Auth::logout();
-        
-        // Importante para limpar a sessão no banco e evitar o erro 419 ao tentar relogar
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $this->service->logout($request);
 
         return redirect('/');
     }
 
-    /**
-     * Exibe a tela de "Esqueci minha senha"
-     */
     public function showForgotPassword()
     {
         return Inertia::render('Auth/ForgotPassword');
     }
 
-    /**
-     * Processa o pedido de recuperação e envia o e-mail
-     */
-    public function sendResetLinkEmail(Request $request)
+    public function sendResetLinkEmail(ForgotPasswordRequest $request): RedirectResponse
     {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-        ]);
+        $data = $request->validated();
 
         try {
-            // Passamos a URL para o construtor da classe
-            $url = route('login'); 
-            
-            Mail::to($request->email)->send(new RecuperarSenhaMail($url));
-            
+            $this->service->sendResetLink($data['email']);
+
             return back()->with('success', 'Link enviado com sucesso!');
         } catch (\Exception $e) {
-            // Se der erro de API do Resend, ele vai cair aqui
-            return back()->withErrors(['email' => 'Erro no provedor de e-mail: ' . $e->getMessage()]);
+            return back()->withErrors([
+                'email' => 'Erro no provedor de e-mail: ' . $e->getMessage()
+            ]);
         }
     }
-
-    
 }
