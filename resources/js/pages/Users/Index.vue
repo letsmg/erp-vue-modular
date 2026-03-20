@@ -38,7 +38,7 @@ const handleDelete = (user) => {
                 <p class="mt-1 text-sm text-gray-500">Lista de colaboradores com acesso ao ERP Zenite.</p>
             </div>
             <div class="mt-4 sm:mt-0">
-                <Link :href="route('users.create')" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg shadow-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition cursor-pointer">
+                <Link v-if="auth.user.access_level === 1" :href="route('users.create')" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg shadow-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition cursor-pointer">
                     <UserPlus class="w-4 h-4 mr-2" />
                     Novo Usuário
                 </Link>
@@ -83,8 +83,8 @@ const handleDelete = (user) => {
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end space-x-3">
-                                    <Link :href="route('users.edit', user.id)" class="text-indigo-600 hover:text-indigo-900 flex items-center transition cursor-pointer group" title="Editar Usuário">
+                                <div class="flex items-center justify-end space-x-3">                                    
+                                    <Link v-if="auth.user.access_level === 1 || user.id == auth.user.id" :href="route('users.edit', user.id)" class="text-indigo-600 hover:text-indigo-900 flex items-center transition cursor-pointer group" title="Editar Usuário">
                                         <UserCog class="w-4 h-4 mr-1 group-hover:scale-110 transition" />
                                         <span>Editar</span>
                                     </Link>

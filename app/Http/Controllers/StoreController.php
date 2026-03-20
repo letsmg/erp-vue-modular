@@ -35,7 +35,7 @@ class StoreController extends Controller
         return Inertia::render('Store/Index', [
             // Listagem com Paginação (O que aparece no grid principal)
             'products' => $query->orderBy('created_at', 'desc')
-                                ->paginate(10)
+                                ->paginate(9)
                                 ->withQueryString(),
 
             // 2. PRODUTOS EM DESTAQUE (Para o Carousel Superior)
