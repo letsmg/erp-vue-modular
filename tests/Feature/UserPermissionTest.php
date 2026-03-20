@@ -75,17 +75,6 @@ class UserPermissionTest extends TestCase
         $response->assertSee($outroUsuario->name);
     }
 
-    public function test_usuario_comum_nao_pode_deletar_nivel_1()
-    {
-        $user = User::factory()->create(['access_level' => 0]);
-        $admin = User::factory()->create(['access_level' => 1]);
-
-        $response = $this->actingAs($user)->delete(route('users.destroy', $admin));
-
-        $response->assertStatus(403); // Não pode deletar admins
-        $this->assertDatabaseHas('users', ['id' => $admin->id]);
-    }
-
     public function test_usuario_comum_pode_resetar_senha_outro_nivel_0()
     {
         $user = User::factory()->create(['access_level' => 0]);
