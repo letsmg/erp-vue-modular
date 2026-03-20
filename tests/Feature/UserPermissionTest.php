@@ -13,24 +13,20 @@ class UserPermissionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Alimenta o banco (SQLite em memória) com seus Seeders antes de cada teste
+        // Pode usar seeders se quiser dados adicionais
         //$this->seed();
     }
 
     public function test_admin_pode_acessar_dashboard()
     {
-        // Em vez de rodar seeder, cria o admin apenas para este teste
         $admin = User::factory()->create([
             'access_level' => 1,
             'is_active' => true
         ]);
 
         $response = $this->actingAs($admin)->get('/dashboard');
-
         $response->assertStatus(200);
     }
-
-    /** --- TESTES DE ACESSO E LOGIN --- **/
 
     public function test_tela_de_login_esta_acessivel()
     {
@@ -49,48 +45,75 @@ class UserPermissionTest extends TestCase
         $user = User::factory()->create();
         $response = $this->actingAs($user)->post(route('logout'));
         
-        $response->assertRedirect('/'); // Ou para onde seu logout aponta
+        $response->assertRedirect('/');
         $this->assertGuest();
     }
 
-    /** --- TESTES DE PERMISSÃO (ADMIN) --- **/
+    /** --- TESTES DE PERMISSÃO (ADMIN / USUÁRIO COMUM) --- **/
 
     public function test_admin_pode_acessar_lista_de_usuarios()
     {
         $admin = User::factory()->create(['access_level' => 1]);
-
         $response = $this->actingAs($admin)->get(route('users.index'));
-
         $response->assertStatus(200);
     }
 
-    public function test_usuario_comum_recebe_403_ao_acessar_usuarios()
+    public function test_usuario_comum_pode_visualizar_usuarios_nivel_0()
     {
+        // Cria o usuário comum que fará a requisição
         $user = User::factory()->create(['access_level' => 0]);
+
+        // Cria outros usuários nível 0 no banco
+        $outroUsuario = User::factory()->create(['access_level' => 0]);
 
         $response = $this->actingAs($user)->get(route('users.index'));
 
-        $response->assertStatus(403);
+        // Espera 200 porque usuários comuns podem ver outros nível 0
+        $response->assertStatus(200);
+
+        // Confirma que os usuários retornados incluem o outro usuário nível 0
+        $response->assertSee($outroUsuario->name);
+    }
+
+    public function test_usuario_comum_nao_pode_deletar_nivel_1()
+    {
+        $user = User::factory()->create(['access_level' => 0]);
+        $admin = User::factory()->create(['access_level' => 1]);
+
+        $response = $this->actingAs($user)->delete(route('users.destroy', $admin));
+
+        $response->assertStatus(403); // Não pode deletar admins
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+    }
+
+    public function test_usuario_comum_pode_resetar_senha_outro_nivel_0()
+    {
+        $user = User::factory()->create(['access_level' => 0]);
+        $outroUsuario = User::factory()->create(['access_level' => 0]);
+
+        $response = $this->actingAs($user)->patch(route('users.reset', $outroUsuario));
+
+        // Espera 200 porque usuários nível 0 podem resetar senha de outros nível 0
+        $response->assertStatus(200);
     }
 
     public function test_admin_pode_cadastrar_usuario()
     {
         $admin = User::factory()->create(['access_level' => 1]);
         
-        $senhaForte = 'Senha@Forte123'; // Atende a todas as suas regras do Controller
+        $senhaForte = 'Senha@Forte123';
 
         $novoUsuario = [
             'name' => 'Clone',
             'email' => 'clone@teste.com',
             'password' => $senhaForte,
-            'password_confirmation' => $senhaForte, // Resolve o 'confirmed'
+            'password_confirmation' => $senhaForte,
             'access_level' => 0,
-            'is_active' => true, // Resolve o 'required' do seu controller
+            'is_active' => true,
         ];
 
         $response = $this->actingAs($admin)->post(route('users.store'), $novoUsuario);
 
-        // Se falhar, o dump abaixo vai te mostrar o erro de validação exato
         if ($response->status() !== 302) {
             dump($response->getSession()->get('errors')->getMessages());
         }
@@ -99,18 +122,18 @@ class UserPermissionTest extends TestCase
         
         $this->assertDatabaseHas('users', [
             'email' => 'clone@teste.com',
-            'is_active' => 1 // No SQLite, true vira 1
+            'is_active' => 1
         ]);
     }
 
     public function test_usuario_comum_nao_pode_deletar_ninguem()
     {
         $user = User::factory()->create(['access_level' => 0]);
-        $alvo = User::factory()->create();
+        $alvo = User::factory()->create(['access_level' => 0]);
 
         $response = $this->actingAs($user)->delete(route('users.destroy', $alvo));
 
-        $response->assertStatus(403);
+        $response->assertStatus(403); // Nível 0 não pode deletar ninguém
         $this->assertDatabaseHas('users', ['id' => $alvo->id]);
     }
 }
