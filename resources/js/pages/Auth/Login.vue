@@ -1,29 +1,26 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { Eye, EyeOff, LogIn } from 'lucide-vue-next';
+import { Eye, EyeOff, LogIn, ShieldCheck, Globe, Monitor } from 'lucide-vue-next';
 
-// Define as propriedades que o Laravel pode enviar (como erros de validação)
-defineProps({ errors: Object });
+// Recebe o IP enviado pelo Controller
+defineProps({ 
+    errors: Object,
+    userIp: String 
+});
 
-// Inicializa o formulário do Inertia
 const form = useForm({
     email: '1@1.com',
     password: '[SenhaNova2026]',
     remember: false,
 });
 
-// Estado para mostrar/esconder senha
 const showPassword = ref(false);
 
-// Função de submissão
 const submit = () => {
     form.post('/login', {
         onFinish: () => form.reset('password'),
         onError: (errors) => {
-            // Se o erro for especificamente de página expirada (comum em SPAs)
-            // O Inertia lida com isso automaticamente recarregando, 
-            // mas você pode forçar um refresh se notar que ele travou.
             if (Object.keys(errors).length === 0) {
                 window.location.reload();
             }
@@ -33,68 +30,80 @@ const submit = () => {
 </script>
 
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="min-h-screen flex items-center justify-center bg-slate-900 px-4 font-sans text-gray-900">
         <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">ERP Zenite</h2>
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">ERP Zenite</h2>
+                <p class="text-sm text-gray-500 mt-2">Identificação de acesso protegida</p>
+            </div>
 
-            <form @submit.prevent="submit">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">E-mail</label>
+            <form @submit.prevent="submit" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 italic">E-mail</label>
                     <input v-model="form.email" type="email" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        :class="{ 'border-red-500': errors.email }">
-                    <div v-if="errors.email" class="text-red-500 text-xs mt-1">{{ errors.email }}</div>
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition"
+                        :class="{ 'border-red-500 ring-1 ring-red-500': errors.email }">
+                    <div v-if="errors.email" class="text-red-500 text-xs mt-1 font-medium">{{ errors.email }}</div>
                 </div>
 
-                <div class="mb-6 relative">
-                    <label class="block text-sm font-medium text-gray-700">Senha</label>
-                    <div class="relative">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 italic">Senha / Password</label>
+                    <div class="relative mt-1">
                         <input :type="showPassword ? 'text' : 'password'" v-model="form.password" required
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            :class="{ 'border-red-500': errors.password }">
-                        
+                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition"
+                            :class="{ 'border-red-500 ring-1 ring-red-500': errors.password }">
                         <button type="button" @click="showPassword = !showPassword"
-                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition">
                             <component :is="showPassword ? EyeOff : Eye" class="h-5 w-5" />
                         </button>
                     </div>
-                    <div v-if="errors.password" class="text-red-500 text-xs mt-1">{{ errors.password }}</div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember" v-model="form.remember" type="checkbox" 
+                            class="h-4 w-4 text-blue-600 border-gray-300 rounded cursor-pointer focus:ring-blue-500">
+                        <label for="remember" class="ml-2 block text-sm text-gray-700 cursor-pointer">Lembrar / Remember</label>
+                    </div>
+                    <Link :href="route('password.request')" class="text-sm font-medium text-blue-600 hover:text-blue-500 transition">Esqueceu? / Forgot?</Link>
                 </div>
 
                 <button type="submit" :disabled="form.processing"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                    class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition transform active:scale-95">
                     <LogIn v-if="!form.processing" class="w-5 h-5 mr-2" />
-                    {{ form.processing ? 'Entrando...' : 'Entrar' }}
+                    {{ form.processing ? 'Verificando...' : 'ENTRAR / LOGIN' }}
                 </button>
             </form>
 
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center">
-                    <input 
-                        id="remember" 
-                        v-model="form.remember" 
-                        type="checkbox" 
-                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    >
-                    <label for="remember" class="ml-2 block text-sm text-gray-700">
-                        Lembrar de mim
-                    </label>
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <div class="flex items-center justify-center space-x-2 mb-6 py-1.5 px-3 bg-gray-50 rounded-full border border-gray-100 shadow-sm">
+                    <Monitor class="w-3.5 h-3.5 text-gray-400" />
+                    <span class="text-[10px] text-gray-500 font-mono tracking-wider uppercase">
+                        IP: <span class="font-bold text-blue-700">{{ userIp || 'Detecting...' }}</span>
+                    </span>
                 </div>
 
-                <div class="text-sm">
-                    <Link 
-                        :href="route('password.request')" 
-                        class="font-medium text-blue-600 hover:text-blue-500"
-                    >
-                        Esqueceu a senha?
-                    </Link>
+                <div class="space-y-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <div class="flex items-start space-x-3">
+                        <ShieldCheck class="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div class="space-y-3">
+                            <p class="text-[11px] text-blue-900 leading-snug">
+                                <strong class="uppercase">Identificação Ativa:</strong><br>
+                                Seu IP foi registrado. O acesso é restrito a conexões brasileiras para auditoria e segurança.
+                            </p>
+                            <p class="text-[10px] text-blue-700 leading-snug italic border-t border-blue-200 pt-2">
+                                <strong class="uppercase">Active Identification:</strong><br>
+                                Your IP address has been logged. Access is restricted to Brazilian connections for security auditing purposes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center items-center mt-5 text-gray-400 space-x-1">
+                    <Globe class="w-3 h-3" />
+                    <span class="text-[9px] uppercase tracking-widest font-bold">Authorized: Brazil (BR) only</span>
                 </div>
             </div>
-
-            <div v-if="errors.email" class="text-red-500 text-sm mt-1">
-                {{ errors.email }}
-            </div>
-
         </div>
     </div>
 </template>

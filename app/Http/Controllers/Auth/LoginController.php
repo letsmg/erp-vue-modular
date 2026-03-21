@@ -79,4 +79,11 @@ class LoginController extends Controller
             ]);
         }
     }
+
+    public function showLoginForm()
+    {
+        return inertia('Auth/Login', [
+            'userIp' => request()->ip()
+        ]);
+    }
 }

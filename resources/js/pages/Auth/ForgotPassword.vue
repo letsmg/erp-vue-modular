@@ -14,7 +14,7 @@ const submit = () => {
 
 <template>
     <Head title="Esqueci minha senha" />
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 min-h-screen flex items-center justify-center bg-slate-900">
         <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
             <h2 class="text-lg font-medium text-gray-900 mb-4">Recuperar Senha</h2>
             
