@@ -48,7 +48,7 @@ class UserPermissionTest extends TestCase
         $user = User::factory()->create();
         $response = $this->actingAs($user)->post(route('logout'));
 
-        $response->assertRedirect('/');
+        $response->assertRedirect('/login');
         $this->assertGuest();
     }
 
