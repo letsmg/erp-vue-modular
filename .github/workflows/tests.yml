@@ -46,14 +46,7 @@ jobs:
           npm install
           npm run build
         
-      - name: Prepare Laravel
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-          # Isso limpa qualquer cache que possa confundir o Vite
-          php artisan config:clear
-
-      - name: Run Tests
+       - name: Run Tests
         run: php artisan test --stop-on-failure
         env:
           APP_ENV: testing
