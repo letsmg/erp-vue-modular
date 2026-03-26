@@ -12,7 +12,7 @@ class UpdateUserRequest extends FormRequest
     {
         $user = $this->route('user');
 
-        return auth()->user()->access_level === 1 || auth()->id() === $user->id;
+        return auth()->user()->access_level->isAdmin() || auth()->id() === $user->id;
     }
 
     public function rules(): array

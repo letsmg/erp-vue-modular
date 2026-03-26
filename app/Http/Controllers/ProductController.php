@@ -89,9 +89,10 @@ class ProductController extends Controller
      */
     public function toggle(Product $product)
     {
-        $this->authorize('toggle', Product::class);
+        $this->authorize('toggle', $product);
 
         $product->update(['is_active' => !$product->is_active]);
+
         return back()->with('message', 'Status de ativação atualizado!');
     }
 

@@ -8,40 +8,50 @@ use App\Models\User;
 class ProductPolicy
 {
     /**
-     * Quem pode ver a listagem (Index)
+     * Listar produtos
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->access_level, [0, 1]);
+        return $user->isStaff();
     }
 
     /**
-     * Quem pode cadastrar
+     * Ver produto específico
+     */
+    public function view(User $user, Product $product): bool
+    {
+        return $user->isStaff();
+    }
+
+    /**
+     * Criar produto
      */
     public function create(User $user): bool
     {
-        return in_array($user->access_level, [0, 1]);
+        return $user->isStaff();
     }
 
     /**
-     * Quem pode deletar (Apenas Nível 1)
+     * Atualizar produto
+     */
+    public function update(User $user, Product $product): bool
+    {
+        return $user->isStaff();
+    }
+
+    /**
+     * Deletar produto
      */
     public function delete(User $user, Product $product): bool
     {
-        return $user->access_level === 1;
+        return $user->isAdmin();
     }
 
     /**
-     * Quem pode alternar destaque/ativo (Apenas Nível 1)
+     * Toggle (ativar/desativar / featured)
      */
-    public function toggle(User $user): bool
+    public function toggle(User $user, Product $product): bool
     {
-        return $user->access_level === 1;
-    }
-
-    public function update(User $user, Product $product): bool
-    {
-        // Ambos os níveis podem editar os dados básicos
-        return in_array($user->access_level, [0, 1]);
+        return $user->isAdmin();
     }
 }

@@ -10,30 +10,27 @@ use App\Mail\RecuperarSenhaMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
+use App\Enums\AccessLevel;
 
 class AuthService
 {
     /**
-     * Valida a localização do IP. 
-     * Se o IP for do exterior, o login é interrompido imediatamente.
+     * Valida a localização do IP.
      */
     private function validateGeographicAccess(): void
     {
         $ip = request()->ip();
 
-        // Ignora verificação em ambiente local (localhost)
         if ($ip === '127.0.0.1' || $ip === '::1') {
             return;
         }
 
         try {
-            // Consulta a API com timeout de 2 segundos
             $response = Http::timeout(2)->get("http://ip-api.com/json/{$ip}?fields=status,countryCode,message");
 
             if ($response->successful() && $response->json('status') === 'success') {
                 $countryCode = $response->json('countryCode');
 
-                // BLOQUEIO: Se o país não for Brasil (BR), impede o acesso
                 if ($countryCode !== 'BR') {
                     logger()->warning("Tentativa de login bloqueada: IP estrangeiro detectado", [
                         'ip' => $ip,
@@ -43,42 +40,54 @@ class AuthService
 
                     throw ValidationException::withMessages([
                         'email' => [
-                            'Acesso negado: Este sistema não aceita logins originados fora do Brasil por razões de segurança.',
-                            'Access denied: This system only accepts logins from Brazil for security reasons.'
+                            'Acesso negado: Este sistema não aceita logins fora do Brasil.'
                         ],
                     ]);
                 }
             }
         } catch (\Exception $e) {
-            // Falha na API: loga o erro mas permite tentativa para não travar o sistema
             logger()->error("Falha no serviço de verificação de IP: " . $e->getMessage());
         }
     }
 
     /**
-     * Realiza o processo de login com dupla verificação e registro de IP
+     * 🔥 LOGIN CORRIGIDO COM ENUM
      */
     public function login(array $credentials, $remember = false)
     {
-        // 1. Verifica se o IP é do Brasil
         $this->validateGeographicAccess();
 
-        // 2. Tenta autenticar
-        $attempt = Auth::attempt([
-            'email' => $credentials['email'],
-            'password' => $credentials['password'],
-            'is_active' => true
-        ], $remember);
+        // 🔎 1. Busca usuário
+        $user = User::where('email', $credentials['email'])->first();
 
-        // 3. Se logou com sucesso, atualiza o campo last_login_ip no banco
-        if ($attempt) {
-            $user = Auth::user();
-            $user->update([
-                'last_login_ip' => request()->ip()
-            ]);
+        if (!$user) {
+            return false;
         }
 
-        return $attempt;
+        // 🔐 2. Valida senha
+        if (!Hash::check($credentials['password'], $user->password)) {
+            return false;
+        }
+
+        // 🚫 3. Verifica se está ativo
+        if (!$user->is_active) {
+            return false;
+        }
+
+        // 🔥 4. REGRA COM ENUM (AQUI É O PULO DO GATO)
+        if ($user->access_level === AccessLevel::CLIENT) {
+            return false;
+        }
+
+        // ✅ 5. Login manual
+        Auth::login($user, $remember);
+
+        // 🧾 6. Auditoria
+        $user->update([
+            'last_login_ip' => request()->ip()
+        ]);
+
+        return true;
     }
 
     public function register(array $data)

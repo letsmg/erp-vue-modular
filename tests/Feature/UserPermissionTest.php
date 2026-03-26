@@ -84,16 +84,16 @@ class UserPermissionTest extends TestCase
             );
     }
 
-    public function test_usuario_comum_pode_resetar_senha_outro_nivel_0()
+    public function test_usuario_comum_nao_pode_resetar_senha_outro_nivel_0()
     {
         $user = User::factory()->create(['access_level' => 0]);
         $outroUsuario = User::factory()->create(['access_level' => 0]);
 
-        $response = $this->actingAs($user)->patch(route('users.reset', $outroUsuario));
+        $response = $this->actingAs($user)
+            ->patch(route('users.reset', $outroUsuario));
 
-        // Redirect esperado
-        $response->assertRedirect();
-        $response->assertSessionHas('message', 'Senha resetada para: Mudar@123');
+        // ❌ Bloqueado pela policy
+        $response->assertStatus(403);
     }
 
     public function test_admin_pode_cadastrar_usuario()
@@ -132,24 +132,16 @@ class UserPermissionTest extends TestCase
         $alvoAdmin = User::factory()->create(['access_level' => 1]);
         $response = $this->actingAs($user)->delete(route('users.destroy', $alvoAdmin));
 
-        $response->assertRedirect();
-        $this->assertEquals(
-            'Você não tem permissão para deletar este usuário.',
-            session('errors')->get('message')[0]
-        );
-        $this->assertEquals(403, session('errors')->get('code')[0]);
+        // Verifica se a resposta é 403 (proibido)
+        $response->assertStatus(403);
         $this->assertDatabaseHas('users', ['id' => $alvoAdmin->id]);
 
         // Tenta deletar outro usuário nível 0
         $alvoNivel0 = User::factory()->create(['access_level' => 0]);
         $response = $this->actingAs($user)->delete(route('users.destroy', $alvoNivel0));
 
-        $response->assertRedirect();
-        $this->assertEquals(
-            'Você não tem permissão para deletar este usuário.',
-            session('errors')->get('message')[0]
-        );
-        $this->assertEquals(403, session('errors')->get('code')[0]);
+        // Verifica se a resposta é 403 (proibido)
+        $response->assertStatus(403);
         $this->assertDatabaseHas('users', ['id' => $alvoNivel0->id]);
     }
 }

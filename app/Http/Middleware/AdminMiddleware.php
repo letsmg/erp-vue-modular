@@ -15,7 +15,7 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (auth()->check() && (int) auth()->user()->access_level === 1) {
+        if (auth()->check() && (int) auth()->user()->access_level->isAdmin()) {
             return $next($request);
         }
 
@@ -27,7 +27,7 @@ class AdminMiddleware
     //era assim
     // public function handle(Request $request, Closure $next)
     // {
-    //     if (auth()->check() && auth()->user()->access_level === 1) {
+    //     if (auth()->check() && auth()->user()->access_level->isAdmin()) {
     //         return $next($request);
     //     }
 

@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Supplier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Enums\AccessLevel;
+
 
 class ProductTest extends TestCase
 {
@@ -24,7 +26,9 @@ class ProductTest extends TestCase
     {
         $admin = $this->createUser(1);
         $operator = $this->createUser(0);
-        $guest = User::factory()->create(['access_level' => 99]); // Outro nível
+        $guest = User::factory()->create([
+            'access_level' => AccessLevel::CLIENT
+        ]);
 
         $this->actingAs($admin)->get(route('products.index'))->assertStatus(200);
         $this->actingAs($operator)->get(route('products.index'))->assertStatus(200);

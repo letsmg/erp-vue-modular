@@ -9,7 +9,7 @@ class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()->access_level === 1; // só admin cria
+        return auth()->user()->access_level->isAdmin(); // só admin cria
     }
 
     public function rules(): array
