@@ -1,31 +1,36 @@
 LICENÇA DE USO RESTRITO - ERP VUE LARAVEL
 
-Copyright (c) 2026 Luiz Eduardo
+Copyright (c) 2026 Luiz Eduardo. Todos os direitos reservados.
 
-Todos os direitos reservados.
+Este software e seu código-fonte são de propriedade exclusiva de Luiz Eduardo e estão protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998 e Lei do Software nº 9.609/1998).
 
-Este software e seu código-fonte são protegidos por direitos autorais. 
-A utilização, cópia, modificação e distribuição são permitidas SOMENTE sob as condições abaixo:
+O código-fonte está disponibilizado publicamente **exclusivamente para fins de análise, revisão e estudo**.
 
-PERMISSÕES:
-- Uso pessoal e educacional é permitido.
-- Modificação do código é permitida para uso próprio.
-- Uso interno em empresas é permitido, desde que NÃO haja comercialização do software.
+**PERMISSÕES:**
+- Visualização e análise do código-fonte é permitida.
+- Uso estritamente pessoal e não-comercial para fins educacionais é permitido.
 
-RESTRIÇÕES:
-- É PROIBIDO vender este software, no todo ou em partes.
-- É PROIBIDO revender, sublicenciar ou redistribuir este software como produto próprio.
-- É PROIBIDO utilizar este software como base para produtos comerciais sem autorização explícita.
+**RESTRIÇÕES (PROIBIÇÕES):**
+- É PROIBIDO qualquer uso comercial, direto ou indireto.
+- É PROIBIDO utilizar o software ou partes dele em ambiente de produção.
+- É PROIBIDO integrar, copiar, modificar ou usar o código como base para qualquer outro projeto ou produto.
+- É PROIBIDO vender, revender, sublicenciar, distribuir ou redistribuir o software (no todo ou em partes).
+- É PROIBIDO o uso interno por empresas ou organizações, mesmo sem fins lucrativos aparentes.
+- É PROIBIDO remover ou alterar este arquivo de licença ou qualquer aviso de copyright.
 
-OBRIGAÇÕES:
-- Deve ser mantido o crédito ao autor original:
-  Nome: Luiz Eduardo
-  Repositório: https://github.com/letsmg
+**OBRIGAÇÕES:**
+- Qualquer menção ou compartilhamento do código deve incluir este aviso de licença completo.
 
-- Qualquer redistribuição do código deve incluir este arquivo de licença.
+**ISENÇÃO DE GARANTIA E LIMITAÇÃO DE RESPONSABILIDADE:**
 
-ISENÇÃO DE GARANTIA:
-Este software é fornecido "como está", sem garantias de qualquer tipo, expressas ou implícitas. 
-O autor não se responsabiliza por quaisquer danos ou prejuízos decorrentes do uso do software.
+O software e seu código-fonte são fornecidos **"NO ESTADO EM QUE SE ENCONTRAM" ("AS IS")**, sem qualquer tipo de garantia, expressa ou implícita.
 
-Para uso comercial, entre em contato com o autor para obter uma licença apropriada.
+O autor **não garante** que o sistema funcionará corretamente, de forma ininterrupta ou livre de erros. O autor não se responsabiliza por quaisquer danos, diretos ou indiretos, causados pelo uso, análise, modificação ou mal uso do software, incluindo perda de dados, interrupção de atividades ou prejuízos financeiros.
+
+O usuário assume integralmente todo o risco decorrente do uso deste software.
+
+**USO COMERCIAL:**
+Qualquer uso comercial, licenciamento ou integração em projetos empresariais requer autorização prévia, expressa e por escrito do autor.  
+Entre em contato através do repositório: https://github.com/letsmg
+
+Última atualização: 27 de março de 2026
