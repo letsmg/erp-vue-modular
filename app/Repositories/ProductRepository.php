@@ -52,8 +52,8 @@ class ProductRepository
             });
         }
 
-        // Manter ordenação consistente sempre por latest (created_at DESC)
-        $query->latest();
+        // Manter ordenação consistente sempre por created_at DESC (mais recente primeiro)
+        $query->orderBy('created_at', 'desc');
 
         // Importante: usamos withQueryString para manter os filtros ao trocar de página
         return $query->paginate(12)->withQueryString();
