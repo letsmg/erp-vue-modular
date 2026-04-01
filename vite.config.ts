@@ -39,13 +39,13 @@ export default defineConfig({
         extensions: ['.js', '.ts', '.vue', '.json'],
     },
     build: {
-        // Configurações otimizadas para CI/CD
-        minify: 'terser', // Mais estável que esbuild
-        sourcemap: false, 
+        // Ativa a minificação pesada para o servidor
+        minify: 'esbuild',
+        sourcemap: false, // Deixa o build mais leve no servidor
         chunkSizeWarningLimit: 1600,
-        target: 'es2020', // Target mais conservador
         rollupOptions: {
             output: {
+                // Organiza melhor os arquivos gerados
                 manualChunks(id) {
                     if (id.includes('node_modules')) {
                         return 'vendor';
@@ -53,7 +53,5 @@ export default defineConfig({
                 },
             },
         },
-        // Limita o uso de memória
-        maxParallelFileOps: 5,
     },
 });
