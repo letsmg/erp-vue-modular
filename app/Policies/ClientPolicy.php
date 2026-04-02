@@ -72,9 +72,18 @@ class ClientPolicy
     public function delete(User $user, Client $client): Response
     {
         // Apenas admin pode deletar clientes
-        return $user->isAdmin()
-            ? Response::allow()
-            : Response::deny('Apenas administradores podem deletar clientes.');
+        if (!$user->isAdmin()) {
+            return Response::deny('Apenas administradores podem excluir clientes.');
+        }
+
+        // Verifica se o cliente tem compras nos últimos 5 anos
+        $lastSale = $client->sales()->latest()->first();
+        
+        if ($lastSale && $lastSale->created_at->gt(now()->subYears(5))) {
+            return Response::deny('Este cliente não pode ser excluído pois possui compras nos últimos 5 anos.');
+        }
+
+        return Response::allow();
     }
 
     /**

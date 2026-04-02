@@ -22,4 +22,51 @@
     --color-brand-800: #1e40af;          /* blue-800 */
     --color-brand-900: #1e3a8a;          /* blue-900 */
     --color-brand-950: #172554;          /* blue-950 */
+
+    /* Cores de Ação */
+    --color-primary: var(--color-brand);
+    --color-primary-hover: var(--color-brand-700);
+    
+    --color-secondary: #64748b;          /* slate-500 */
+    --color-secondary-hover: #475569;    /* slate-600 */
+    
+    --color-success: #22c55e;            /* green-500 */
+    --color-success-hover: #16a34a;      /* green-600 */
+    
+    --color-danger: #ef4444;             /* red-500 */
+    --color-danger-hover: #dc2626;       /* red-600 */
+    
+    --color-warning: #f59e0b;            /* amber-500 */
+    --color-warning-hover: #d97706;      /* amber-600 */
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg;
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg;
+        @apply bg-primary text-white hover:bg-primary-hover shadow-primary/20 hover:shadow-xl;
+    }
+
+    .btn-secondary {
+        @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg;
+        @apply bg-secondary text-white hover:bg-secondary-hover shadow-slate-500/20 hover:shadow-xl;
+    }
+
+    .btn-success {
+        @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg;
+        @apply bg-success text-white hover:bg-success-hover shadow-success/20 hover:shadow-xl;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg;
+        @apply bg-danger text-white hover:bg-danger-hover shadow-danger/20 hover:shadow-xl;
+    }
+
+    .btn-warning {
+        @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg;
+        @apply bg-warning text-white hover:bg-warning-hover shadow-warning/20 hover:shadow-xl;
+    }
 }

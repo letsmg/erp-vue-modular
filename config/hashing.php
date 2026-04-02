@@ -29,26 +29,9 @@ return [
     */
 
     'argon' => [
-        'memory' => 65536, // 64MB conforme solicitado
-        'threads' => 2,    // 2 threads conforme solicitado
-        'time' => 4,       // Vezes que o algoritmo rodará
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Argon Options
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify the configuration options that should be used when
-    | passwords are hashed using the Argon algorithm. These will allow you
-    | to control the amount of time it takes to hash the given password.
-    |
-    */
-
-    'argon' => [
-        'memory' => env('ARGON_MEMORY', 65536),
-        'threads' => env('ARGON_THREADS', 1),
-        'time' => env('ARGON_TIME', 4),
+        'memory' => env('ARGON_MEMORY', 65536), // 64MB conforme solicitado
+        'threads' => env('ARGON_THREADS', 2),    // 2 threads conforme solicitado
+        'time' => env('ARGON_TIME', 4),          // Vezes que o algoritmo rodará
         'verify' => env('HASH_VERIFY', true),
     ],
 

@@ -3,6 +3,7 @@
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SanitizeInput;
 use App\Http\Middleware\ClientMiddleware;
+use App\Http\Middleware\StaffMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,9 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
             SanitizeInput::class,
         ]);
 
-        // Registra middleware de cliente
+        // Registra aliases de middleware
         $middleware->alias([
             'client' => ClientMiddleware::class,
+            'staff' => StaffMiddleware::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
 
         // Redireciona usuários não autenticados que tentarem acessar rotas protegidas

@@ -31,11 +31,50 @@ class Seo extends Model
 
     public function getMetaTitleAttribute($value)
     {
-        return $value ?: $this->h1;
+        return htmlspecialchars($value ?: $this->h1, ENT_QUOTES, 'UTF-8');
     }
 
     public function getMetaDescriptionAttribute($value)
     {
-        return $value ?: 'Confira os detalhes deste produto em nossa loja oficial.';
+        $desc = $value ?: 'Confira os detalhes deste produto em nossa loja oficial.';
+        return htmlspecialchars($desc, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getMetaKeywordsAttribute($value)
+    {
+        $keywords = $this->castAttribute('meta_keywords', $value);
+        
+        if (is_string($keywords)) {
+            $keywords = json_decode($keywords, true) ?: explode(',', $keywords);
+        }
+
+        $keywords = is_array($keywords) ? $keywords : [];
+        
+        return array_map(fn($kw) => htmlspecialchars(trim($kw), ENT_QUOTES, 'UTF-8'), $keywords);
+    }
+
+    public function getH1Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getH2Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getText1Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getText2Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getSlugAttribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 }

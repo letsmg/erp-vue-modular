@@ -68,11 +68,11 @@ Route::middleware('guest')->prefix('cliente')->name('client.')->group(function (
 
 /*
 |--------------------------------------------------------------------------
-| 3. ADMIN (AUTH)
+| 3. ADMIN (AUTH + STAFF)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'staff'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');

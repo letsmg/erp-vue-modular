@@ -95,9 +95,12 @@ watch(() => page.url, () => isMobileMenuOpen.value = false);
                 </Link>
 
                 <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-400/50 mt-6 mb-2 px-3">Comercial</p>
-                <div class="flex items-center gap-3 p-3 rounded-xl font-medium opacity-40 cursor-not-allowed ">
-                    <Contact2 class="w-5"/> <span>Clientes</span>
-                </div>
+                <Link :href="route('clients.index')" 
+                    :class="[isUrl('/clients') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : ' hover:bg-indigo-900 hover:text-white']"
+                    class="flex items-center p-3 rounded-xl transition-all duration-200 group font-medium">
+                    <Contact2 class="w-5 group-hover:scale-110 transition-transform"/>
+                    <span class="ml-3">Clientes</span>
+                </Link>
                 <div class="flex items-center gap-3 p-3 rounded-xl font-medium opacity-40 cursor-not-allowed ">
                     <ShoppingCart class="w-5"/> <span>Vendas</span>
                 </div>

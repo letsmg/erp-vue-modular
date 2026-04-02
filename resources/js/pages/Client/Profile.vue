@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { ref } from 'vue'
+import ClientLayout from '@/Layouts/ClientLayout.vue'
+import { ref, watch } from 'vue'
 
-defineOptions({ layout: AuthenticatedLayout })
+defineOptions({ layout: ClientLayout })
 
 const page = usePage()
 const user = page.props.auth.user
@@ -255,7 +255,7 @@ const submitPassword = () => {
                 <div class="flex justify-end">
                   <button
                     type="submit"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    class="btn-primary"
                     :disabled="form.processing"
                   >
                     <span v-if="form.processing">Salvando...</span>
@@ -338,7 +338,7 @@ const submitPassword = () => {
                 <div class="flex justify-end">
                   <button
                     type="submit"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    class="btn-primary"
                     :disabled="passwordForm.processing"
                   >
                     <span v-if="passwordForm.processing">Alterando...</span>

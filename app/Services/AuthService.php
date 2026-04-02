@@ -51,9 +51,9 @@ class AuthService
     }
 
     /**
-     * 🔥 LOGIN CORRIGIDO COM ENUM
+     * 🔥 LOGIN CORRIGIDO COM ENUM E PERFIS DISTINTOS
      */
-    public function login(array $credentials, $remember = false)
+    public function login(array $credentials, $remember = false, bool $isClientAuth = false)
     {
         $this->validateGeographicAccess();
 
@@ -74,9 +74,17 @@ class AuthService
             return false;
         }
 
-        // 🔥 4. REGRA COM ENUM (AQUI É O PULO DO GATO)
-        if ($user->access_level === AccessLevel::CLIENT) {
-            return false;
+        // 🔥 4. VALIDAÇÃO DE PERFIL POR PORTAL
+        if ($isClientAuth) {
+            // Se for login de cliente, o usuário DEVE ser um CLIENT
+            if ($user->access_level !== AccessLevel::CLIENT) {
+                return false;
+            }
+        } else {
+            // Se for login administrativo, o usuário NÃO PODE ser um CLIENT
+            if ($user->access_level === AccessLevel::CLIENT) {
+                return false;
+            }
         }
 
         // ✅ 5. Login manual

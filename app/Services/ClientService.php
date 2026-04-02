@@ -61,6 +61,14 @@ class ClientService
     }
 
     /**
+     * Busca cliente por ID de usuário
+     */
+    public function findByUserId(int $userId): ?Client
+    {
+        return $this->repository->findByUserId($userId);
+    }
+
+    /**
      * Valida documento único
      */
     public function validateDocument(string $document, ?int $excludeId = null): array

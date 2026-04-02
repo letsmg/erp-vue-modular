@@ -29,6 +29,15 @@ class ClientAuthController extends Controller
      */
     public function showLogin()
     {
+        if (auth()->check()) {
+            if (auth()->user()->isClient()) {
+                return redirect()->route('client.dashboard');
+            }
+            if (auth()->user()->isStaff()) {
+                return redirect()->route('dashboard');
+            }
+        }
+
         return Inertia::render('Client/Auth/Login', [
             'userIp' => request()->ip(),
             'status' => session('status'),
@@ -45,10 +54,10 @@ class ClientAuthController extends Controller
         // Adiciona filtro para apenas clientes
         $credentials['access_level'] = 2; // CLIENT
 
-        if ($this->authService->login($credentials, $request->boolean('remember'))) {
+        if ($this->authService->login($credentials, $request->boolean('remember'), true)) {
             // Verifica se o usuário tem cliente associado
             $user = auth()->user();
-            $client = $this->clientService->repository->findByUserId($user->id);
+            $client = $this->clientService->findByUserId($user->id);
             
             if (!$client) {
                 auth()->logout();

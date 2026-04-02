@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import AuthLayout from '@/Layouts/AuthLayout.vue'
+import StoreLayout from '@/Layouts/StoreLayout.vue'
 
-defineOptions({ layout: AuthLayout })
+defineOptions({ layout: StoreLayout })
 
 const form = useForm({
   name: '',
@@ -53,165 +53,166 @@ const submit = () => {
 </script>
 
 <template>
-  <Head title="Cadastro Cliente" />
+  <Head title="Cadastro Cliente">
+    <meta name="robots" content="follow" />
+  </Head>
 
-  <div class="mx-auto max-w-md">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Criar conta</h1>
-      <p class="mt-2 text-sm text-gray-600">
-        Preencha os dados abaixo para se cadastrar
-      </p>
-    </div>
-
-    <form @submit.prevent="submit" class="space-y-6">
-      <div>
-        <label for="name" class="block text-sm font-medium text-gray-700">
-          Nome completo *
-        </label>
-        <div class="mt-1">
-          <input
-            id="name"
-            v-model="form.name"
-            type="text"
-            class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            required
-            autocomplete="name"
-          />
+  <div class="min-h-[60vh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-xl">
+      <div class="bg-white py-8 px-4 shadow-2xl rounded-3xl sm:px-10 border border-slate-100">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-black text-slate-900 uppercase tracking-tighter">Criar conta</h1>
+          <p class="mt-2 text-sm font-bold text-slate-500 uppercase tracking-widest">
+            Preencha os dados abaixo para se cadastrar
+          </p>
         </div>
-        <p v-if="form.errors.name" class="mt-2 text-sm text-red-600">
-          {{ form.errors.name }}
-        </p>
-      </div>
 
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">
-          E-mail *
-        </label>
-        <div class="mt-1">
-          <input
-            id="email"
-            v-model="form.email"
-            type="email"
-            class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            required
-            autocomplete="email"
-          />
+        <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="md:col-span-2">
+            <label for="name" class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              Nome completo *
+            </label>
+            <div class="mt-1">
+              <input
+                id="name"
+                v-model="form.name"
+                type="text"
+                class="block w-full bg-slate-50 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-primary transition-all outline-none shadow-sm"
+                required
+                autocomplete="name"
+                placeholder="Seu Nome Completo"
+              />
+            </div>
+            <p v-if="form.errors.name" class="mt-2 text-xs font-bold text-red-600 uppercase">
+              {{ form.errors.name }}
+            </p>
+          </div>
+
+          <div>
+            <label for="email" class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              E-mail *
+            </label>
+            <div class="mt-1">
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                class="block w-full bg-slate-50 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-primary transition-all outline-none shadow-sm"
+                required
+                autocomplete="email"
+                placeholder="seu@email.com"
+              />
+            </div>
+            <p v-if="form.errors.email" class="mt-2 text-xs font-bold text-red-600 uppercase">
+              {{ form.errors.email }}
+            </p>
+          </div>
+
+          <div>
+            <label for="document_number" class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              CPF/CNPJ *
+            </label>
+            <div class="mt-1">
+              <input
+                id="document_number"
+                v-model="form.document_number"
+                type="text"
+                class="block w-full bg-slate-50 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-primary transition-all outline-none shadow-sm"
+                required
+                maxlength="18"
+                placeholder="000.000.000-00"
+                @input="formatDocument"
+              />
+            </div>
+            <p v-if="form.errors.document_number" class="mt-2 text-xs font-bold text-red-600 uppercase">
+              {{ form.errors.document_number }}
+            </p>
+          </div>
+
+          <div>
+            <label for="phone" class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              Telefone
+            </label>
+            <div class="mt-1">
+              <input
+                id="phone"
+                v-model="form.phone"
+                type="tel"
+                class="block w-full bg-slate-50 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-primary transition-all outline-none shadow-sm"
+                maxlength="15"
+                placeholder="(00) 00000-0000"
+                @input="formatPhone"
+              />
+            </div>
+            <p v-if="form.errors.phone" class="mt-2 text-xs font-bold text-red-600 uppercase">
+              {{ form.errors.phone }}
+            </p>
+          </div>
+
+          <div class="md:col-span-1">
+            <label for="password" class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              Senha *
+            </label>
+            <div class="mt-1">
+              <input
+                id="password"
+                v-model="form.password"
+                type="password"
+                class="block w-full bg-slate-50 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-primary transition-all outline-none shadow-sm"
+                required
+                autocomplete="new-password"
+                placeholder="••••••••"
+              />
+            </div>
+            <p v-if="form.errors.password" class="mt-2 text-xs font-bold text-red-600 uppercase">
+              {{ form.errors.password }}
+            </p>
+          </div>
+
+          <div>
+            <label for="password_confirmation" class="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2">
+              Confirmar senha *
+            </label>
+            <div class="mt-1">
+              <input
+                id="password_confirmation"
+                v-model="form.password_confirmation"
+                type="password"
+                class="block w-full bg-slate-50 border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-primary transition-all outline-none shadow-sm"
+                required
+                autocomplete="new-password"
+                placeholder="••••••••"
+              />
+            </div>
+            <p v-if="form.errors.password_confirmation" class="mt-2 text-xs font-bold text-red-600 uppercase">
+              {{ form.errors.password_confirmation }}
+            </p>
+          </div>
+
+          <div class="md:col-span-2 mt-4">
+            <button
+              type="submit"
+              class="btn-primary w-full py-4 rounded-2xl shadow-lg shadow-primary/20 text-sm uppercase tracking-widest font-black"
+              :class="{ 'opacity-25': form.processing }"
+              :disabled="form.processing"
+            >
+              Criar minha conta
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-8 pt-8 border-t border-slate-100 text-center">
+          <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">
+            Já tem uma conta?
+            <Link
+              :href="route('client.login')"
+              class="ml-1 font-black text-primary hover:text-primary-hover transition"
+            >
+              Fazer login
+            </Link>
+          </p>
         </div>
-        <p v-if="form.errors.email" class="mt-2 text-sm text-red-600">
-          {{ form.errors.email }}
-        </p>
       </div>
-
-      <div>
-        <label for="document_number" class="block text-sm font-medium text-gray-700">
-          CPF/CNPJ *
-        </label>
-        <div class="mt-1">
-          <input
-            id="document_number"
-            v-model="form.document_number"
-            type="text"
-            class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            required
-            maxlength="18"
-            placeholder="000.000.000-00 ou 00.000.000/0000-00"
-            @input="formatDocument"
-          />
-        </div>
-        <p v-if="form.errors.document_number" class="mt-2 text-sm text-red-600">
-          {{ form.errors.document_number }}
-        </p>
-      </div>
-
-      <div>
-        <label for="phone" class="block text-sm font-medium text-gray-700">
-          Telefone
-        </label>
-        <div class="mt-1">
-          <input
-            id="phone"
-            v-model="form.phone"
-            type="tel"
-            class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            maxlength="15"
-            placeholder="(00) 00000-0000"
-            @input="formatPhone"
-          />
-        </div>
-        <p v-if="form.errors.phone" class="mt-2 text-sm text-red-600">
-          {{ form.errors.phone }}
-        </p>
-      </div>
-
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">
-          Senha *
-        </label>
-        <div class="mt-1">
-          <input
-            id="password"
-            v-model="form.password"
-            type="password"
-            class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            required
-            autocomplete="new-password"
-          />
-        </div>
-        <p v-if="form.errors.password" class="mt-2 text-sm text-red-600">
-          {{ form.errors.password }}
-        </p>
-      </div>
-
-      <div>
-        <label for="password_confirmation" class="block text-sm font-medium text-gray-700">
-          Confirmar senha *
-        </label>
-        <div class="mt-1">
-          <input
-            id="password_confirmation"
-            v-model="form.password_confirmation"
-            type="password"
-            class="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-            required
-            autocomplete="new-password"
-          />
-        </div>
-        <p v-if="form.errors.password_confirmation" class="mt-2 text-sm text-red-600">
-          {{ form.errors.password_confirmation }}
-        </p>
-      </div>
-
-      <div>
-        <button
-          type="submit"
-          class="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-          :disabled="form.processing"
-        >
-          <span v-if="form.processing">Cadastrando...</span>
-          <span v-else>Cadastrar</span>
-        </button>
-      </div>
-
-      <div class="text-center">
-        <p class="text-sm text-gray-600">
-          Já tem uma conta?
-          <Link
-            :href="route('client.login')"
-            class="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Faça login
-          </Link>
-        </p>
-      </div>
-    </form>
-
-    <div class="mt-6 text-center">
-      <Link
-        :href="route('login')"
-        class="text-sm text-gray-500 hover:text-gray-700"
-      >
-        ← Voltar para área administrativa
-      </Link>
     </div>
   </div>
 </template>

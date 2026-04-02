@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, usePage } from '@inertiajs/vue3'
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import ClientLayout from '@/Layouts/ClientLayout.vue'
 
-defineOptions({ layout: AuthenticatedLayout })
+defineOptions({ layout: ClientLayout })
 
 const page = usePage()
 const user = page.props.auth.user

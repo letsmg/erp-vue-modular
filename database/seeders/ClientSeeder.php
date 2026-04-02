@@ -13,37 +13,45 @@ class ClientSeeder extends Seeder
      */
     public function run(): void
     {
-        // Criar usuários clientes primeiro
-        $clientUsers = User::factory()->count(10)->create([
-            'access_level' => 2, // CLIENT
-            'is_active' => true,
-        ]);
+        $password = 'Mudar@123';
 
-        // Para cada usuário cliente, criar um cliente
-        foreach ($clientUsers as $user) {
-            Client::factory()->create([
-                'user_id' => $user->id,
-                'document_type' => fake()->randomElement(['CPF', 'CNPJ']),
-                'document_number' => fake()->numerify(
-                    fake()->randomElement(['###########', '##############'])
-                ),
-                'state_registration' => fake()->optional(0.7)->numerify('#########'),
-                'municipal_registration' => fake()->optional(0.5)->numerify('#########'),
-                'contributor_type' => fake()->randomElement([1, 2, 9]),
-                'is_active' => true,
-            ]);
+        // Criar 10 usuários clientes com padrão cli@1.com, cli@2.com...
+        for ($i = 1; $i <= 10; $i++) {
+            $email = "cli@$i.com";
+            
+            // Verifica se o usuário já existe para evitar erro de Unique
+            $user = User::where('email', $email)->first();
+
+            if (!$user) {
+                $user = User::factory()->create([
+                    'name' => "Cliente Teste $i",
+                    'email' => $email,
+                    'password' => $password,
+                    'access_level' => 2, // CLIENT
+                    'is_active' => true,
+                ]);
+            }
+
+            // Garante que o cliente associado ao usuário também exista
+            Client::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'name' => "Cliente Teste $i",
+                    'document_type' => fake()->randomElement(['CPF', 'CNPJ']),
+                    'document_number' => fake()->numerify(
+                        fake()->randomElement(['###########', '##############'])
+                    ),
+                    'state_registration' => fake()->optional(0.7)->numerify('#########'),
+                    'municipal_registration' => fake()->optional(0.5)->numerify('#########'),
+                    'contributor_type' => fake()->randomElement([1, 2, 9]),
+                    'is_active' => true,
+                ]
+            );
         }
 
-        // Criar alguns clientes sem usuário (para testes)
+        // Criar alguns clientes sem usuário (para testes de prospecção/vendas diretas)
         Client::factory()->count(5)->create([
             'user_id' => null,
-            'document_type' => fake()->randomElement(['CPF', 'CNPJ']),
-            'document_number' => fake()->numerify(
-                fake()->randomElement(['###########', '##############'])
-            ),
-            'state_registration' => fake()->optional(0.7)->numerify('#########'),
-            'municipal_registration' => fake()->optional(0.5)->numerify('#########'),
-            'contributor_type' => fake()->randomElement([1, 2, 9]),
             'is_active' => true,
         ]);
     }

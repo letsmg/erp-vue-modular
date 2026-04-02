@@ -18,22 +18,30 @@ class ShoppingCartSeeder extends Seeder
         $clientUsers = User::where('access_level', 2)->get();
         $products = Product::where('is_active', true)->get();
 
+        if ($products->isEmpty()) {
+            return;
+        }
+
         foreach ($clientUsers as $user) {
-            // Cada cliente terá entre 0 e 5 itens no carrinho
-            $cartItemCount = fake()->numberBetween(0, 5);
+            // Sorteia alguns produtos para este usuário (entre 0 e 5)
+            $selectedProducts = $products->random(min($products->count(), fake()->numberBetween(0, 5)));
             
-            for ($i = 0; $i < $cartItemCount; $i++) {
-                $product = $products->random();
+            foreach ($selectedProducts as $product) {
                 $quantity = fake()->numberBetween(1, 5);
                 $unitPrice = $product->sale_price ?? $product->cost_price ?? fake()->randomFloat(2, 10, 500);
                 
-                ShoppingCart::factory()->create([
-                    'user_id' => $user->id,
-                    'product_id' => $product->id,
-                    'quantity' => $quantity,
-                    'unit_price' => $unitPrice,
-                    'total_price' => $unitPrice * $quantity,
-                ]);
+                // Usar updateOrCreate para evitar Unique violation
+                ShoppingCart::updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'product_id' => $product->id,
+                    ],
+                    [
+                        'quantity' => $quantity,
+                        'unit_price' => $unitPrice,
+                        'total_price' => $unitPrice * $quantity,
+                    ]
+                );
             }
         }
     }

@@ -23,6 +23,15 @@ class LoginController extends Controller
     // Unificamos showLogin e showLoginForm aqui
     public function showLogin()
     {
+        if (auth()->check()) {
+            if (auth()->user()->isStaff()) {
+                return redirect()->intended('/dashboard');
+            }
+            if (auth()->user()->isClient()) {
+                return redirect()->route('store.index');
+            }
+        }
+
         return Inertia::render('Auth/Login', [
             'userIp' => request()->ip(),
             'status' => session('status'),

@@ -11,6 +11,11 @@ class ShoppingCart extends Model
     use HasFactory;
 
     /**
+     * Tabela associada ao modelo (Fix: Singular na Migration)
+     */
+    protected $table = 'shopping_cart';
+
+    /**
      * Atributos que podem ser preenchidos em massa (Mass Assignment).
      */
     protected $fillable = [

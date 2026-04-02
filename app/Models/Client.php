@@ -90,20 +90,58 @@ class Client extends Model
         return $this->document_type === 'CNPJ' && strlen($this->document_number) === 14;
     }
 
+    public function getNameAttribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getPhoneAttribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getPhone1Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getContact1Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getPhone2Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getContact2Attribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getStateRegistrationAttribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function getMunicipalRegistrationAttribute($value)
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
     /**
      * Formata o documento com máscara
      */
     public function getFormattedDocumentAttribute(): string
     {
+        $doc = $this->document_number;
         if ($this->isCPF()) {
-            return preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $this->document_number);
+            $doc = preg_replace('/(\d{3})(\d{3})(\d{3})(\d{2})/', '$1.$2.$3-$4', $doc);
+        } elseif ($this->isCNPJ()) {
+            $doc = preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $doc);
         }
-        
-        if ($this->isCNPJ()) {
-            return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $this->document_number);
-        }
-        
-        return $this->document_number;
+        return htmlspecialchars($doc, ENT_QUOTES, 'UTF-8');
     }
 
     /**
