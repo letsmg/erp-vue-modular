@@ -1,13 +1,16 @@
 name: 🚀 Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: ["🚀 CI tests"] # Certifique-se que o nome do arquivo de teste é exatamente este
+    types: [completed]
     branches: [main]
 
 jobs:
-  deploy:    
+  deploy: 
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # ⏱️ Segurança - evita execução infinita
+    # Trava de segurança: só roda se o teste passou
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: 🔑 Configure SSH
@@ -20,33 +23,34 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@147.15.80.52 << 'EOF'
             set -e
             
+            # 1. Garante que o Git não reclame da pasta
+            git config --global --add safe.directory /var/www/erp
             cd /var/www/erp
             
             echo "📥 Atualizando código..."
+            sudo chown -R ubuntu:www-data /var/www/erp
             git reset --hard
             git pull origin main
 
-            echo "📦 Dependências PHP..."
-            # Usamos o cache local para ser instantâneo
+            echo "📦 Dependências e Build (com trava de memória)..."
             composer install --no-dev --optimize-autoloader --no-interaction --no-progress
             
-            echo "📦 Dependências Node..."
-            # NÃO apague node_modules. O npm install só baixará o que mudou.
-            npm install --no-audit --no-fund
+            # Otimização: Não apagamos o node_modules para ganhar tempo, 
+            # mas limitamos a RAM do Node para não travar o SSH
+            npm install --legacy-peer-deps
             
-            echo "🔨 Build assets..."           
             export NODE_OPTIONS="--max-old-space-size=1024"
             npm run build
 
-            echo "🗄️ Migrations..."
-            php artisan migrate --force
+            echo "🗄️ Resetando Banco (Portfolio Mode)..."
+            php artisan migrate:fresh --seed
             
-            echo "🧹 Otimização Laravel..."
+            echo "🧹 Otimização e Storage..."
             php artisan optimize
-            
-            echo "🔐 Permissões cirúrgicas..."
-            # Em vez de chown no projeto todo, focamos no necessário
-            sudo chown -R www-data:www-data storage bootstrap/cache
+            rm -rf public/storage && php artisan storage:link            
+
+            echo "🔐 Permissões..."
+            sudo chown -R www-data:www-data /var/www/erp
             sudo chmod -R 775 storage bootstrap/cache
 
             echo "🔄 Reiniciando PHP..."
