@@ -34,7 +34,8 @@ jobs:
             # NÃO apague node_modules. O npm install só baixará o que mudou.
             npm install --no-audit --no-fund
             
-            echo "🔨 Build assets..."
+            echo "🔨 Build assets..."           
+            export NODE_OPTIONS="--max-old-space-size=1024"
             npm run build
 
             echo "🗄️ Migrations..."
