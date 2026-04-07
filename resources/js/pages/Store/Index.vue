@@ -79,7 +79,7 @@ const scroll = (id, direction) => {
 
 // SEO data
 const seoData = ref({
-    title: "Vitrine Premium | ERP Zenite",
+    title: "Vitrine Premium | ERP Vue Laravel",
     description: "Explore nossa seleção exclusiva de produtos.",
     h1: "Catálogo de Produtos"
 });

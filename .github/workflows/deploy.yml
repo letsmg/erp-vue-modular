@@ -1,94 +1,61 @@
-name: 🚀 Deploy to Production
+name: 🚀 Deploy
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy:    
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10  # ⏱️ Segurança - evita execução infinita
+
     steps:
-      - name: 📥 Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 🐧 Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: 🔑 Configure SSH
+        uses: webfactory/ssh-agent@v0.8.0
         with:
-          php-version: '8.2'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, redis
-          tools: composer:v2
-          cache: composer
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: � Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: � Install Dependencies
+      - name: 🚀 Executar deploy no servidor
         run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-          npm ci
-
-      - name: 🔨 Build Assets
-        run: |
-          npm run build
-
-      - name: � Deploy to Server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.ORACLE_IP }}
-          username: ${{ secrets.ORACLE_USER }}
-          key: ${{ secrets.ORACLE_SSH_KEY }}
-          port: ${{ secrets.ORACLE_PORT }}
-          script: |
-            cd /home/ubuntu/app
+          ssh -o StrictHostKeyChecking=no ubuntu@147.15.80.52 << 'EOF'
+            set -e
             
-            # Backup atual
-            sudo cp -r /home/ubuntu/app /home/ubuntu/backup_$(date +%Y%m%d_%H%M%S)
+            echo "🛡️ Configurando exceção de segurança do Git"
+            git config --global --add safe.directory /var/www/erp
+
+            cd /var/www/erp
             
-            # Pull novo código
+            echo "📥 Atualizando código..."
+            sudo chown -R ubuntu:www-data /var/www/erp
+            git reset --hard
             git pull origin main
+
+            echo "📦 Dependências PHP..."
+            composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-progress
             
-            # Instala dependências
-            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+            echo "📦 Dependências Node..."
+            rm -rf node_modules package-lock.json
+            npm install --legacy-peer-deps
             
-            # Build assets (se necessário)
-            npm ci
+            echo "🔨 Build assets..."
             npm run build
-            
-            # Docker Compose com Redis
-            docker-compose down
-            docker-compose up -d --build
-            
-            # Limpa cache Laravel
-            php artisan cache:clear
-            php artisan config:clear
-            php artisan route:clear
-            php artisan view:clear
-            
-            # Otimiza produção
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            
-            # Permissões
-            sudo chown -R www-data:www-data storage bootstrap/cache
-            
-            # Verifica containers
-            docker ps
-            docker logs redis_prod
 
-      - name: 🧪 Health Check
-        run: |
-          sleep 30
-          curl -f ${{ secrets.APP_URL }}/health || exit 1
+            echo "🗄️ Migrations..."
+            php artisan migrate --force
+            
+            echo "🧹 Otimização Laravel..."
+            php artisan optimize:clear            
+            php artisan optimize
+            
+            echo "🔗 Storage link..."
+            rm -rf public/storage && php artisan storage:link            
 
-      - name: 📊 Deployment Summary
-        run: |
-          echo "🎉 Deploy completed successfully!"
-          echo "📦 Redis: $(curl -s http://localhost:6379 || echo 'Not accessible')"
-          echo "🌐 App: ${{ secrets.APP_URL }}"
-          echo "📅 Deployed at: $(date)"
+            echo "🔐 Permissões..."
+            sudo chown -R www-data:www-data /var/www/erp
+            sudo chmod -R 775 storage bootstrap/cache
+
+            echo "🔄 Reiniciando PHP..."
+            sudo systemctl restart php8.3-fpm
+            
+            echo "✅ Deploy finalizado com sucesso!"
+          EOF
