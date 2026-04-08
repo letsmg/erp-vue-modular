@@ -51,17 +51,21 @@ jobs:
             echo "🛠️ Garantindo ferramentas..."
             sudo apt update && sudo apt install unzip -y
 
-            echo "🧹 Limpeza Total com Permissões de Admin..."
-            # Adicionamos 'sudo' antes do find para remover arquivos do www-data
+            echo "🧹 Limpeza Total..."
             sudo find . -maxdepth 1 ! -name '.env' ! -name 'storage' ! -name '.' -exec rm -rf {} +
 
             echo "📦 Extraindo novo código..."
-            # Extraímos como ubuntu, depois o chown lá embaixo resolve
             sudo unzip -o /tmp/deploy.zip -d .
             sudo rm /tmp/deploy.zip
 
+            echo "🔐 Permissões Provisórias (Para evitar erro de Log)..."
+            # Damos permissão antes de rodar os comandos artisan
+            sudo chown -R www-data:www-data /var/www/erp
+            sudo chmod -R 775 storage bootstrap/cache
+
             echo "🗄️ Database & Cache..."
-            # Rodamos os comandos artisan através do usuário ubuntu mas com permissão total
+            # Se a migration de remover colunas der erro, o fresh vai travar. 
+            # Verifique se a sua migration 'create_seo_table' condiz com o estado final desejado.
             php artisan migrate:fresh --seed --force
             php artisan optimize:clear
             
@@ -70,12 +74,11 @@ jobs:
             php artisan storage:link
 
             echo "🔐 Ajustando Permissões Finais..."
-            # Devolvemos o controle total para o servidor web (www-data)
             sudo chown -R www-data:www-data /var/www/erp
             sudo chmod -R 775 storage bootstrap/cache public/build
             
             echo "🔄 Reiniciando PHP..."
             sudo systemctl restart php8.3-fpm
             
-            echo "✅ Deploy Finalizado com Sucesso!"
+            echo "✅ Deploy Finalizado!"
           EOF
