@@ -7,7 +7,6 @@ import {
     ShoppingBag, ChevronLeft, 
     ChevronRight, ShieldCheck, SearchX, ArrowUpDown, ChevronDown, Package, Loader2
 } from 'lucide-vue-next';
-import SearchSuggestions from '@/components/SearchSuggestions.vue';
 
 const props = defineProps({
     products: Object,
@@ -306,15 +305,6 @@ const reloadProducts = debounce(async () => {
         </Head>
 
         <header class="max-w-7xl mx-auto px-4 md:px-6 pt-10">
-            <!-- Componente de Sugestões Inteligentes -->
-            <div class="mb-8">
-                <SearchSuggestions
-                    :initial-search="localSearch"
-                    @search="handleSearch"
-                    @suggestion-selected="handleSuggestionSelected"
-                />
-            </div>
-            
             <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
                 {{ seoData.h1 }}
             </h1>

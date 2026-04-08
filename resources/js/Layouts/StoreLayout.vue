@@ -6,6 +6,7 @@ import {
 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { onClickOutside } from '@vueuse/core';
+import { debounce } from 'lodash-es';
 
 const page = usePage();
 const auth = computed(() => page.props.auth);
@@ -24,6 +25,10 @@ const toggleDropdown = () => {
 
 // Estado da busca
 const searchValue = ref('');
+const suggestions = ref([]);
+const showSuggestions = ref(false);
+const suggestionsRef = ref(null);
+const highlightedIndex = ref(-1);
 
 // Recebe o valor da busca do Index
 const props = defineProps({
@@ -33,9 +38,77 @@ const props = defineProps({
 // Avisa o Index que o usuário digitou algo
 const emit = defineEmits(['update:searchTerm']);
 
+// Fecha sugestões ao clicar fora
+onClickOutside(suggestionsRef, () => {
+    showSuggestions.value = false;
+});
+
+// Busca sugestões com debounce
+const fetchSuggestions = debounce(async (term) => {
+    if (term.length < 2) {
+        suggestions.value = [];
+        showSuggestions.value = false;
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/search/suggestions?term=${encodeURIComponent(term)}`);
+        const data = await response.json();
+        
+        suggestions.value = data.suggestions || [];
+        showSuggestions.value = suggestions.value.length > 0;
+        highlightedIndex.value = -1;
+    } catch (error) {
+        console.error('Erro ao buscar sugestões:', error);
+        suggestions.value = [];
+        showSuggestions.value = false;
+    }
+}, 300);
+
+// Quando digita no campo
+const handleInput = () => {
+    fetchSuggestions(searchValue.value);
+};
+
+// Seleciona uma sugestão
+const selectSuggestion = (suggestion) => {
+    searchValue.value = suggestion.term;
+    showSuggestions.value = false;
+    handleSearch();
+};
+
+// Navegação com teclado
+const handleKeydown = (event) => {
+    if (!showSuggestions.value || suggestions.value.length === 0) return;
+
+    switch (event.key) {
+        case 'ArrowDown':
+            event.preventDefault();
+            highlightedIndex.value = Math.min(highlightedIndex.value + 1, suggestions.value.length - 1);
+            break;
+        case 'ArrowUp':
+            event.preventDefault();
+            highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1);
+            break;
+        case 'Enter':
+            if (highlightedIndex.value >= 0) {
+                event.preventDefault();
+                selectSuggestion(suggestions.value[highlightedIndex.value]);
+            } else {
+                handleSearch();
+            }
+            break;
+        case 'Escape':
+            showSuggestions.value = false;
+            highlightedIndex.value = -1;
+            break;
+    }
+};
+
 // Função para buscar com Enter
 const handleSearch = () => {
     if (searchValue.value.trim()) {
+        showSuggestions.value = false;
         window.location.href = `/?search=${encodeURIComponent(searchValue.value)}`;
     }
 };
@@ -71,13 +144,17 @@ watch(() => props.searchTerm, (newValue) => {
                     Erp<span class="text-indigo-500">Vue Laravel</span>
                 </Link>
                 
-                <div class="hidden md:flex flex-1 max-w-md mx-10 relative">
+                <div class="hidden md:flex flex-1 max-w-md mx-10 relative" ref="suggestionsRef">
                     <input 
                         v-model="searchValue"
+                        @input="handleInput"
+                        @keydown="handleKeydown"
                         @keyup.enter="handleSearch"
+                        @focus="searchValue.length >= 2 && fetchSuggestions(searchValue)"
                         type="text" 
                         placeholder="Buscar na loja..."
                         class="w-full bg-slate-800 border-transparent rounded-2xl pl-4 pr-24 py-3 text-sm text-white placeholder-slate-500 focus:bg-slate-700 focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                        autocomplete="off"
                     />
                     <button 
                         @click="handleLupaClick"
@@ -86,6 +163,33 @@ watch(() => props.searchTerm, (newValue) => {
                         <Search class="w-4 h-4" />
                         <span>Pesquisar</span>
                     </button>
+                    
+                    <!-- Dropdown de Sugestões -->
+                    <div
+                        v-show="showSuggestions && suggestions.length > 0"
+                        class="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-[100]"
+                    >
+                        <div class="max-h-80 overflow-y-auto py-2">
+                            <div
+                                v-for="(suggestion, index) in suggestions"
+                                :key="suggestion.term"
+                                @click="selectSuggestion(suggestion)"
+                                @mouseenter="highlightedIndex = index"
+                                @mouseleave="highlightedIndex = -1"
+                                class="px-4 py-3 cursor-pointer flex items-center gap-3 transition-colors"
+                                :class="{ 
+                                    'bg-indigo-50': highlightedIndex === index,
+                                    'hover:bg-slate-50': highlightedIndex !== index
+                                }"
+                            >
+                                <Search class="w-4 h-4 text-slate-400 flex-shrink-0" />
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-sm font-medium text-slate-800">{{ suggestion.term }}</span>
+                                    <span class="text-xs text-slate-400 ml-2">{{ suggestion.type }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-6">

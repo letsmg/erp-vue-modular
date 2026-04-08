@@ -5,6 +5,7 @@
       type="text"
       v-model="searchTerm"
       @input="handleInput"
+      @keydown="handleKeydown"
       @focus="showSuggestions = true"
       @blur="hideSuggestions"
       placeholder="Buscar produtos..."
@@ -13,8 +14,8 @@
     
     <!-- Lista de sugestões -->
     <div
-      v-if="showSuggestions && suggestions.length > 0"
-      class="absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto"
+      v-show="showSuggestions && suggestions.length > 0"
+      class="absolute z-[100] w-full bg-white border border-gray-300 rounded-lg shadow-xl mt-1 max-h-60 overflow-y-auto top-full left-0"
     >
       <div class="p-2">
         <div
@@ -82,21 +83,13 @@ const fetchSuggestions = debounce(async (term) => {
   }
 }, 300)
 
-// Registra busca quando usuário digitar
+// Quando usuário digita - só busca sugestões, NÃO registra e NÃO busca
 const handleInput = (event) => {
   const term = event.target.value
   searchTerm.value = term
   
-  // Registra busca se tiver mais de 1 caractere
-  if (term.length >= 2) {
-    registerSearch(term)
-  }
-  
-  // Busca sugestões
+  // Só busca sugestões (não registra no Redis ainda)
   fetchSuggestions(term)
-  
-  // Emite evento de busca
-  emit('search', term)
 }
 
 // Seleciona sugestão
@@ -105,10 +98,7 @@ const selectSuggestion = (suggestion) => {
   showSuggestions.value = false
   highlightedIndex.value = -1
   
-  // Registra busca selecionada
-  registerSearch(suggestion.term)
-  
-  // Emite eventos
+  // Emite evento de busca (vai para a página de resultados)
   emit('suggestion-selected', suggestion)
   emit('search', suggestion.term)
 }

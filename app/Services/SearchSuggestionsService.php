@@ -41,7 +41,8 @@ class SearchSuggestionsService
     }
 
     /**
-     * Obtém sugestões baseadas em buscas anteriores
+     * Obtém sugestões baseadas em dados reais do banco (descrições, marcas, categorias)
+     * Só retorna palavras que existem em produtos reais
      */
     public function getSuggestions(string $term, int $limit = self::MAX_SUGGESTIONS): array
     {
@@ -58,8 +59,8 @@ class SearchSuggestionsService
                 return json_decode($cached, true);
             }
 
-            // Busca sugestões do banco
-            $suggestions = $this->generateSuggestions($term, $limit);
+            // Busca sugestões do banco de dados (produtos reais)
+            $suggestions = $this->generateSuggestionsFromDatabase($term, $limit);
             
             // Cacheia resultado
             Redis::setex($cacheKey, self::SUGGESTIONS_CACHE_TTL, json_encode($suggestions));
@@ -112,7 +113,149 @@ class SearchSuggestionsService
     }
 
     /**
-     * Gera sugestões baseadas em análise de dados
+     * Gera sugestões baseadas em dados REAIS do banco (produtos, marcas, categorias)
+     * Só retorna termos que existem em produtos ativos
+     */
+    private function generateSuggestionsFromDatabase(string $term, int $limit): array
+    {
+        $term = strtolower($term);
+        $suggestions = [];
+        
+        // 1. Busca descrições de produtos que começam com o termo
+        $productSuggestions = $this->getProductSuggestions($term, $limit / 2);
+        $suggestions = array_merge($suggestions, $productSuggestions);
+        
+        // 2. Busca marcas que começam com o termo
+        $brandSuggestions = $this->getBrandSuggestions($term, $limit / 3);
+        $suggestions = array_merge($suggestions, $brandSuggestions);
+        
+        // 3. Busca modelos que começam com o termo
+        $modelSuggestions = $this->getModelSuggestions($term, $limit / 3);
+        $suggestions = array_merge($suggestions, $modelSuggestions);
+        
+        // Remove duplicados e limita
+        $suggestions = array_unique($suggestions, SORT_REGULAR);
+        $suggestions = array_slice($suggestions, 0, $limit);
+        
+        Log::info('Sugestões geradas do banco', [
+            'term' => $term,
+            'suggestions' => $suggestions,
+            'products' => count($productSuggestions),
+            'brands' => count($brandSuggestions),
+            'models' => count($modelSuggestions)
+        ]);
+        
+        return $suggestions;
+    }
+
+    /**
+     * Busca sugestões de descrições de produtos
+     */
+    private function getProductSuggestions(string $term, int $limit): array
+    {
+        $products = \App\Models\Product::where('is_active', true)
+            ->where(function ($query) use ($term) {
+                $query->whereRaw("LOWER(description) LIKE LOWER(?)", [$term . '%'])
+                      ->orWhereRaw("LOWER(description) LIKE LOWER(?)", ['% ' . $term . '%']);
+            })
+            ->select('description')
+            ->distinct()
+            ->limit($limit * 2)
+            ->get();
+        
+        $suggestions = [];
+        foreach ($products as $product) {
+            // Extrai palavras da descrição que começam com o termo
+            $words = $this->extractWordsStartingWith($product->description, $term);
+            foreach ($words as $word) {
+                if (strlen($word) >= 3) {
+                    $suggestions[] = [
+                        'term' => $word,
+                        'score' => 1,
+                        'type' => 'produto'
+                    ];
+                }
+            }
+        }
+        
+        return array_slice($suggestions, 0, $limit);
+    }
+
+    /**
+     * Busca sugestões de marcas
+     */
+    private function getBrandSuggestions(string $term, int $limit): array
+    {
+        $brands = \App\Models\Product::where('is_active', true)
+            ->whereNotNull('brand')
+            ->whereRaw("LOWER(brand) LIKE LOWER(?)", [$term . '%'])
+            ->select('brand')
+            ->distinct()
+            ->limit($limit)
+            ->get();
+        
+        $suggestions = [];
+        foreach ($brands as $product) {
+            $suggestions[] = [
+                'term' => $product->brand,
+                'score' => 1,
+                'type' => 'marca'
+            ];
+        }
+        
+        return $suggestions;
+    }
+
+    /**
+     * Busca sugestões de modelos
+     */
+    private function getModelSuggestions(string $term, int $limit): array
+    {
+        $models = \App\Models\Product::where('is_active', true)
+            ->whereNotNull('model')
+            ->whereRaw("LOWER(model) LIKE LOWER(?)", [$term . '%'])
+            ->select('model')
+            ->distinct()
+            ->limit($limit)
+            ->get();
+        
+        $suggestions = [];
+        foreach ($models as $product) {
+            $suggestions[] = [
+                'term' => $product->model,
+                'score' => 1,
+                'type' => 'modelo'
+            ];
+        }
+        
+        return $suggestions;
+    }
+
+    /**
+     * Extrai palavras de um texto que começam com o termo
+     */
+    private function extractWordsStartingWith(string $text, string $term): array
+    {
+        $text = strtolower($text);
+        $term = strtolower($term);
+        
+        // Remove caracteres especiais
+        $clean = preg_replace('/[^a-z0-9\s]/', ' ', $text);
+        $words = explode(' ', $clean);
+        
+        $matches = [];
+        foreach ($words as $word) {
+            $word = trim($word);
+            if (strlen($word) >= 3 && str_starts_with($word, $term)) {
+                $matches[] = $word;
+            }
+        }
+        
+        return array_unique($matches);
+    }
+
+    /**
+     * Método legado: Gera sugestões baseadas em histórico Redis (mantido para trending)
      */
     private function generateSuggestions(string $term, int $limit): array
     {
@@ -132,16 +275,8 @@ class SearchSuggestionsService
         $suggestions = array_merge($suggestions, $similar);
         
         // Remove duplicados e limita
-        $suggestions = array_unique($suggestions);
+        $suggestions = array_unique($suggestions, SORT_REGULAR);
         $suggestions = array_slice($suggestions, 0, $limit);
-        
-        Log::info('Sugestões geradas', [
-            'term' => $term,
-            'suggestions' => $suggestions,
-            'starts_with_count' => count($startsWith),
-            'related_count' => count($related),
-            'similar_count' => count($similar)
-        ]);
         
         return $suggestions;
     }
