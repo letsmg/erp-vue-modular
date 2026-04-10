@@ -67,6 +67,15 @@ class SearchSuggestionsService
             
             return $suggestions;
             
+        } catch (\Illuminate\Redis\Connections\ConnectionException $e) {
+            // Redis não está disponível - busca direto do banco
+            Log::warning('Redis indisponível, buscando direto do banco', [
+                'term' => $term,
+                'error' => $e->getMessage()
+            ]);
+            
+            return $this->generateSuggestionsFromDatabase($term, $limit);
+            
         } catch (\Exception $e) {
             Log::error('Erro ao buscar sugestões', [
                 'term' => $term,
