@@ -58,9 +58,12 @@ class SupplierTest extends TestCase
             'contact_name_1' => '<i>João</i> Silva',
             'phone_1' => '(11) 99999-9999',
             'is_active' => true,
+            '_token' => 'test',
         ];
 
-        $response = $this->actingAs($user)->post(route('suppliers.store'), $dados);
+        $response = $this->actingAs($user)
+            ->withSession(['_token' => 'test'])
+            ->post(route('suppliers.store'), $dados);
 
         $response->assertRedirect(route('suppliers.index'));
         $this->assertDatabaseHas('suppliers', ['cnpj' => '12.345.678/0001-90']);
@@ -80,7 +83,9 @@ class SupplierTest extends TestCase
         $user = User::factory()->create();
         $supplier = Supplier::factory()->create(['company_name' => 'Antigo Nome']);
 
-        $response = $this->actingAs($user)->put(route('suppliers.update', $supplier), [
+        $response = $this->actingAs($user)
+            ->withSession(['_token' => 'test'])
+            ->put(route('suppliers.update', $supplier), [
             'company_name' => 'Novo Nome Atualizado',
             'cnpj' => $supplier->cnpj,
             'state_registration' => $supplier->state_registration,
@@ -93,6 +98,7 @@ class SupplierTest extends TestCase
             'contact_name_1' => $supplier->contact_name_1,
             'phone_1' => $supplier->phone_1,
             'is_active' => false,
+            '_token' => 'test',
         ]);
 
         $response->assertRedirect(route('suppliers.index'));
@@ -112,7 +118,9 @@ class SupplierTest extends TestCase
         $user = User::factory()->create();
         $supplier = Supplier::factory()->create();
 
-        $response = $this->actingAs($user)->delete(route('suppliers.destroy', $supplier));
+        $response = $this->actingAs($user)
+            ->withSession(['_token' => 'test'])
+            ->delete(route('suppliers.destroy', $supplier), ['_token' => 'test']);
 
         $response->assertRedirect(route('suppliers.index'));
         $this->assertModelMissing($supplier);

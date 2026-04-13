@@ -37,7 +37,7 @@ class ShoppingCartController extends Controller
         $this->authorize('create', ShoppingCart::class);
         
         $productId = $request->input('product_id');
-        $this->authorize('addProduct', ShoppingCart::class, $productId);
+        $this->authorize('addProduct', [ShoppingCart::class, $productId]);
         
         $quantity = $request->input('quantity', 1);
         $userId = auth()->id();

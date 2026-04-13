@@ -60,7 +60,8 @@ class ShoppingCartRepository
     public function updateQuantity(ShoppingCart $cartItem, int $quantity): ShoppingCart
     {
         if ($quantity <= 0) {
-            return $this->removeItem($cartItem);
+            $this->removeItem($cartItem);
+            return $cartItem; // Retorna o item mesmo após remoção para manter tipo de retorno
         }
 
         $cartItem->update([

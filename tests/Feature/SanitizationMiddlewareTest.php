@@ -23,9 +23,12 @@ class SanitizationMiddlewareTest extends TestCase
             'brand' => '  Updated Brand  ',
             'model' => '<script>alert("xss")</script>Model',
             'collection' => '<em>New Collection</em>',
+            '_token' => 'test',
         ];
 
-        $response = $this->actingAs($user)->put(route('products.update', $product), $data);
+        $response = $this->actingAs($user)
+            ->withSession(['_token' => 'test'])
+            ->put(route('products.update', $product), $data);
 
         $response->assertRedirect();
         
@@ -56,9 +59,12 @@ class SanitizationMiddlewareTest extends TestCase
             'contact_name_1' => '<i>João</i> Silva',
             'phone_1' => '(11) 99999-9999',
             'is_active' => true,
+            '_token' => 'test',
         ];
 
-        $response = $this->actingAs($user)->post(route('suppliers.store'), $data);
+        $response = $this->actingAs($user)
+            ->withSession(['_token' => 'test'])
+            ->post(route('suppliers.store'), $data);
 
         $response->assertRedirect();
         

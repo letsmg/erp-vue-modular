@@ -291,7 +291,7 @@ class ShoppingCartTest extends TestCase
 
         $this->assertFalse($validation['valid']);
         $this->assertCount(1, $validation['issues']);
-        $this->assertStringContainsString('não está disponível', $validation['issues'][0]['message']);
+        $this->assertStringContainsString('Produto não encontrado', $validation['issues'][0]['message']);
     }
 
     /** @test */
