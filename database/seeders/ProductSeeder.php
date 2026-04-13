@@ -48,11 +48,10 @@ class ProductSeeder extends Seeder
                     if ($imageContent) {
                         Storage::disk('public')->put('products/' . $imageName, $imageContent);
 
-                        ProductImage::create([
-                            'product_id' => $product->id,
-                            'path'       => $imageName,
-                            'order'      => $i
-                        ]);
+                        ProductImage::firstOrCreate(
+                            ['product_id' => $product->id, 'order' => $i],
+                            ['path' => $imageName]
+                        );
                     }
                 } catch (\Exception $e) {
                     $this->command->error("Falha ao baixar imagem para o produto {$product->id}");
