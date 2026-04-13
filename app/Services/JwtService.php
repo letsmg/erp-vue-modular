@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use App\Models\User;
+use Modules\User\Models\User;
 use Exception;
 
 class JwtService

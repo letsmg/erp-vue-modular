@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Web;
 
-use App\Models\User;
-use App\Models\Supplier;
+use Modules\User\Models\User;
+use Modules\Supplier\Models\Supplier;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -35,7 +35,7 @@ class SanitizationTest extends TestCase
 
         $response->assertRedirect();
         
-        $supplier = \App\Models\Supplier::where('cnpj', '12.345.678/0001-90')->first();
+        $supplier = Modules\Supplier\Models\Supplier::where('cnpj', '12.345.678/0001-90')->first();
         $this->assertNotNull($supplier);
         
         // Verifica se os campos foram sanitizados
@@ -117,7 +117,7 @@ class SanitizationTest extends TestCase
         // Verifica se a requisição foi bem-sucedida
         $this->assertEquals(302, $response->status());
         
-        $supplier = \App\Models\Supplier::where('email', 'testxss@company.com')->first();
+        $supplier = Modules\Supplier\Models\Supplier::where('email', 'testxss@company.com')->first();
         $this->assertNotNull($supplier, 'Supplier não encontrado');
         
         // Verifica se o XSS foi removido

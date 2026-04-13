@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Supplier;
+use Modules\Supplier\Models\Supplier;
 use Illuminate\Database\Seeder;
 
 class SupplierSeeder extends Seeder
@@ -41,7 +41,7 @@ class SupplierSeeder extends Seeder
         ];
 
         foreach ($data as $supplier) {
-            \App\Models\Supplier::updateOrCreate(
+            Supplier::updateOrCreate(
                 ['email' => $supplier['email']], 
                 $supplier
             );

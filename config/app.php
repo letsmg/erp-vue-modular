@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Erp Vue Laravel'),
+    'name' => env('APP_NAME', 'Erp Vue Modular'),
 
     /*
     |--------------------------------------------------------------------------

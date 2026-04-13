@@ -26,7 +26,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Login - ERP Vue Laravel" />
+        <Head title="Login - Erp Vue Modular" />
         
         <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
             <div class="mb-6 flex justify-center">
@@ -37,7 +37,7 @@ const submit = () => {
             </div>
             
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">ERP Vue Laravel</h2>
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Erp Vue Modular</h2>
                 <p class="text-sm text-gray-500 mt-2">Identificação de acesso protegida</p>
             </div>
 

@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Product;
+use Modules\Product\Models\Product;
 use App\Services\SmartSearchService;
 use Illuminate\Http\Request;
 

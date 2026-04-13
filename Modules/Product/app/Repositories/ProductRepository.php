@@ -176,7 +176,7 @@ class ProductRepository
      */
     public function getAllCategories() 
     {
-        return \App\Models\Category::query()
+        return App\Models\Category::query()
             ->where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name']);

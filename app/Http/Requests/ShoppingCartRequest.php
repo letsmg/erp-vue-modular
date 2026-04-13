@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Product;
+use Modules\Product\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ShoppingCartRequest extends FormRequest
@@ -55,7 +55,7 @@ class ShoppingCartRequest extends FormRequest
                     'min:1',
                     'max:100',
                     function ($attribute, $value, $fail) {
-                        $cartItem = \App\Models\ShoppingCart::find($this->route('cart_item'));
+                        $cartItem = App\Models\ShoppingCart::find($this->route('cart_item'));
                         if ($cartItem && $cartItem->product) {
                             if ($value > $cartItem->product->stock_quantity) {
                                 $fail('Quantidade indisponível em estoque. Máximo: ' . $cartItem->product->stock_quantity);

@@ -378,7 +378,7 @@ class SelfClientAuthController extends Controller
             $data['is_delivery_address'] = true;
         }
 
-        \App\Models\Address::create($data);
+        App\Models\Address::create($data);
 
         return redirect()->route('client.profile')
             ->with('success', 'Endereço adicionado com sucesso!');
@@ -387,7 +387,7 @@ class SelfClientAuthController extends Controller
     /**
      * Atualiza um endereço existente.
      */
-    public function updateAddress(\App\Http\Requests\AddressRequest $request, \App\Models\Address $address)
+    public function updateAddress(\App\Http\Requests\AddressRequest $request, App\Models\Address $address)
     {
         $user = Auth::user();
         $client = $this->repository->findByUserId($user->id);
@@ -414,7 +414,7 @@ class SelfClientAuthController extends Controller
     /**
      * Exclui um endereço.
      */
-    public function destroyAddress(\App\Models\Address $address)
+    public function destroyAddress(App\Models\Address $address)
     {
         $user = Auth::user();
         $client = $this->repository->findByUserId($user->id);
@@ -447,7 +447,7 @@ class SelfClientAuthController extends Controller
     /**
      * Define um endereço como principal de entrega.
      */
-    public function setDeliveryAddress(\App\Models\Address $address)
+    public function setDeliveryAddress(App\Models\Address $address)
     {
         $user = Auth::user();
         $client = $this->repository->findByUserId($user->id);

@@ -119,7 +119,7 @@ export function useStoreIndex(props) {
 
     // --- SEO ---
     const seoData = computed(() => page.props.store_seo ?? {
-        title: "Vitrine Premium | ERP Vue Laravel",
+        title: "Vitrine Premium | Erp Vue Modular",
         description: "Explore nossa seleção exclusiva de produtos.",
         h1: "Catálogo de Produtos"
     });

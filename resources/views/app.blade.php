@@ -36,7 +36,7 @@
     @endif
 
     {{-- 3. Title --}}
-    <title inertia>{{ config('app.name', 'ERP Vue Laravel') }}</title>
+    <title inertia>{{ config('app.name', 'Erp Vue Modular') }}</title>
 
     {{-- Favicon --}}
     <link rel="icon" type="image/x-icon" href="{{ asset('icon.ico') }}">

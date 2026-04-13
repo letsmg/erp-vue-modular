@@ -104,7 +104,7 @@
     </table>
 
     <div class="footer">
-        ERP VUE LARAVEL - Relatório Gerado em {{ date('d/m/Y H:i') }}
+        Erp Vue Modular - Relatório Gerado em {{ date('d/m/Y H:i') }}
     </div>
 </body>
 </html>

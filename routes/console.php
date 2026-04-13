@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Product;
+use Modules\Product\Models\Product;
 
 // Pode manter o inspire se quiser, ou apagar.
 Artisan::command('inspire', function () {
@@ -22,7 +22,7 @@ Schedule::call(function () {
     DB::table('product_images')->truncate();
 
     // 3. Limpa o SEO dos produtos
-    DB::table('seo_metadata')->where('seoable_type', \App\Models\Product::class)->delete();
+    DB::table('seo_metadata')->where('seoable_type', Modules\Product\Models\Product::class)->delete();
 
     // 4. Limpa os Produtos
     DB::table('products')->delete();

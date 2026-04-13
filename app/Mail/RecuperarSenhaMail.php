@@ -18,7 +18,7 @@ class RecuperarSenhaMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Recuperação de Senha - ERP Vue Laravel',
+            subject: 'Recuperação de Senha - Erp Vue Modular',
         );
     }
 

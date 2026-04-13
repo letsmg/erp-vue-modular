@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Product;
+use Modules\Product\Models\Product;
 use App\Models\ShoppingCart;
-use App\Models\User;
+use Modules\User\Models\User;
 use Illuminate\Database\Seeder;
 
 class ShoppingCartSeeder extends Seeder

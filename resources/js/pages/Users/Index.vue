@@ -35,7 +35,7 @@ const handleDelete = (user) => {
         <div class="sm:flex sm:items-center sm:justify-between mb-8">
             <div>
                 <h2 class="text-3xl font-black text-gray-900 tracking-tighter uppercase">Usuários</h2>
-                <p class="mt-1 text-sm text-gray-500">Lista de colaboradores com acesso ao ERP Vue Laravel.</p>
+                <p class="mt-1 text-sm text-gray-500">Lista de colaboradores com acesso ao Erp Vue Modular.</p>
             </div>
             <div class="mt-4 sm:mt-0">
                 <Link v-if="auth.user.access_level === 1" :href="route('users.create')" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 active:shadow-lg text-white px-6 py-3 rounded-2xl flex items-center gap-2 transition-all duration-200 shadow-lg shadow-indigo-500/20 hover:shadow-xl font-bold uppercase text-xs tracking-widest cursor-pointer">

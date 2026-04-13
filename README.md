@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/letsmg/erp-vue-laravel/main/pacman-contribution-graph.svg" />
 
-# 🌌 ERP Vue Laravel — Smart Business Management
+# 🌌 Erp Vue Modular — Smart Business Management
 
 > Sistema moderno de gestão empresarial (ERP) construído com **Laravel + Vue**, focado em **performance, segurança e experiência do desenvolvedor (DX)**.
 
@@ -29,7 +29,7 @@
 
 # 📦 Visão Geral
 
-ERP Vue Laravel é um ERP moderno projetado para entregar:
+Erp Vue Modular é um ERP moderno projetado para entregar:
 
 * ⚡ Alta performance
 * 🔒 Segurança robusta
@@ -298,7 +298,7 @@ Suporte à integração com Google Cloud Vision para análise automática de ima
 
 # 📦 Overview
 
-ERP Vue Laravel is a modern ERP designed to deliver:
+Erp Vue Modular is a modern ERP designed to deliver:
 
 * ⚡ High performance
 * 🔒 Robust security
@@ -570,7 +570,7 @@ MIT License
 ---
 
 <p align="center">
-<strong>ERP Vue Laravel — Technology for Smart Business</strong>
+<strong>Erp Vue Modular — Technology for Smart Business</strong>
 </p>
 
 <p align="center">

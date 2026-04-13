@@ -146,6 +146,6 @@ class Product extends Model
 
     public function category()
     {
-        return $this->belongsTo(\App\Models\Category::class);
+        return $this->belongsTo(App\Models\Category::class);
     }
 }

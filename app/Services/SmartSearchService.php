@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Redis;
-use App\Models\Product;
+use Modules\Product\Models\Product;
 use Illuminate\Support\Collection;
 
 class SmartSearchService

@@ -51,7 +51,7 @@ class Client extends Model
      */
     public function addresses(): HasMany
     {
-        return $this->hasMany(\App\Models\Address::class);
+        return $this->hasMany(App\Models\Address::class);
     }
 
     /**
@@ -69,7 +69,7 @@ class Client extends Model
      */
     public function shoppingCartItems(): HasMany
     {
-        return $this->hasMany(\App\Models\ShoppingCart::class, 'user_id', 'user_id');
+        return $this->hasMany(App\Models\ShoppingCart::class, 'user_id', 'user_id');
     }
 
     /**
