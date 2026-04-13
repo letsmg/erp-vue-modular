@@ -60,28 +60,30 @@ jobs:
             sudo mkdir -p ${BASE_DIR}_new
             sudo unzip -o /tmp/deploy_modular.zip -d ${BASE_DIR}_new
             
-            # 2. AJUSTE DE PERMISSÕES ANTECIPADO (Evita erro no storage:link)
+            # 2. AJUSTE DE PERMISSÕES ANTECIPADO
             sudo chown -R www-data:www-data ${BASE_DIR}_new
+            sudo chown -R www-data:www-data ${BASE_DIR}_shared/storage
             
             # 3. Linkar arquivos persistentes (Shared)
+            # O .env e a pasta storage raiz
             sudo ln -sfn ${BASE_DIR}_shared/.env ${BASE_DIR}_new/.env
             sudo ln -sfn ${BASE_DIR}_shared/storage ${BASE_DIR}_new/storage
             
-            # 4. Comandos Laravel (Rodando como www-data)
+            # 4. CORREÇÃO DO LINK DE IMAGENS (Resolve 403/404)
+            # Removemos o que o zip ou o Laravel tentarem criar e apontamos manualmente para o cofre de fotos
+            sudo rm -rf ${BASE_DIR}_new/public/storage
+            sudo ln -sfn ${BASE_DIR}_shared/storage/app/public ${BASE_DIR}_new/public/storage
+            
+            # 5. Comandos Laravel (Rodando como www-data)
             cd ${BASE_DIR}_new
-            
-            # Remove link de storage antigo se existir no pacote zip
-            sudo rm -rf public/storage
-            
             sudo -u www-data php artisan migrate --force
             sudo -u www-data php artisan db:seed --force
-            sudo -u www-data php artisan storage:link
             sudo -u www-data php artisan optimize
             
-            # 5. SWAP ATÔMICO (Ativa a nova versão)
+            # 6. SWAP ATÔMICO (Ativa a nova versão)
             sudo ln -sfn ${BASE_DIR}_new ${BASE_DIR}_live
             
-            # 6. Finalização
+            # 7. Finalização
             sudo systemctl restart php8.3-fpm
             sudo rm /tmp/deploy_modular.zip
             
