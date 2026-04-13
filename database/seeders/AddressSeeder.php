@@ -18,12 +18,29 @@ class AddressSeeder extends Seeder
         foreach ($clients as $index => $client) {
             // Cada cliente terá entre 1 e 3 endereços
             $addressCount = fake()->numberBetween(1, 3);
-            
+
             for ($i = 1; $i <= $addressCount; $i++) {
-                Address::factory()->create([
-                    'client_id' => $client->id,
-                    'is_delivery_address' => $i === 1, // Primeiro endereço é o de entrega
-                ]);
+                $street = fake()->streetName();
+                $number = fake()->buildingNumber();
+
+                Address::firstOrCreate(
+                    [
+                        'client_id' => $client->id,
+                        'street' => $street,
+                        'number' => $number,
+                    ],
+                    [
+                        'client_id' => $client->id,
+                        'street' => $street,
+                        'number' => $number,
+                        'complement' => fake()->secondaryAddress(),
+                        'neighborhood' => fake()->neighborhood(),
+                        'city' => fake()->city(),
+                        'state' => fake()->stateAbbr(),
+                        'zip_code' => fake()->postcode(),
+                        'is_delivery_address' => $i === 1, // Primeiro endereço é o de entrega
+                    ]
+                );
             }
         }
     }

@@ -23,13 +23,16 @@ class ClientSeeder extends Seeder
             $user = User::where('email', $email)->first();
 
             if (!$user) {
-                $user = User::factory()->create([
-                    'name' => "Cliente Teste $i",
-                    'email' => $email,
-                    'password' => $password,
-                    'access_level' => 2, // CLIENT
-                    'is_active' => true,
-                ]);
+                $user = User::firstOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => "Cliente Teste $i",
+                        'email' => $email,
+                        'password' => $password,
+                        'access_level' => 2, // CLIENT
+                        'is_active' => true,
+                    ]
+                );
             }
 
             // Garante que o cliente associado ao usuário também exista
@@ -50,9 +53,16 @@ class ClientSeeder extends Seeder
         }
 
         // Criar alguns clientes sem usuário (para testes de prospecção/vendas diretas)
-        Client::factory()->count(5)->create([
-            'user_id' => null,
-            'is_active' => true,
-        ]);
+        for ($i = 1; $i <= 5; $i++) {
+            Client::firstOrCreate(
+                ['document_number' => fake()->numerify(fake()->randomElement(['###########', '##############']))],
+                [
+                    'user_id' => null,
+                    'is_active' => true,
+                    'name' => "Cliente Prospecção $i",
+                    'document_type' => fake()->randomElement(['CPF', 'CNPJ']),
+                ]
+            );
+        }
     }
 }

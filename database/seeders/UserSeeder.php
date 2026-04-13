@@ -13,7 +13,17 @@ class UserSeeder extends Seeder
         // 1. Para os usuários normais aleatórios, podemos manter a factory,
         // mas é recomendável só rodar se a tabela estiver vazia para evitar lentidão
         if (User::count() < 5) {
-            User::factory()->count(5)->create();
+            for ($i = 1; $i <= 5; $i++) {
+                User::firstOrCreate(
+                    ['email' => "user$i@teste.com"],
+                    [
+                        'name' => "Usuário Teste $i",
+                        'password' => Hash::make('Mudar@123'),
+                        'access_level' => fake()->randomElement([0, 2]),
+                        'is_active' => true,
+                    ]
+                );
+            }
         }
 
         // 2. O ADMIN (O ponto onde deu o erro)
