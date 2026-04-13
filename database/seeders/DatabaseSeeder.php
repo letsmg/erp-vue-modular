@@ -13,23 +13,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Só roda os seeders se as tabelas estiverem vazias
+        if (\Modules\User\Models\User::count() == 0) {
+            $this->call(SingleUserSeeder::class);
+        }
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        if (\Modules\User\Models\User::count() < 6) {
+            $this->call(UserSeeder::class);
+        }
 
-        // O método call recebe um array com as classes que você deseja executar
-        $this->call([
-            SingleUserSeeder::class,
-            UserSeeder::class,            
-            SupplierSeeder::class,
-            CategorySeeder::class,            
-            ClientSeeder::class,
-            AddressSeeder::class,            
-            ProductSeeder::class,            
-            ShoppingCartSeeder::class,
-        ]);
+        if (\Modules\Supplier\Models\Supplier::count() == 0) {
+            $this->call(SupplierSeeder::class);
+        }
+
+        if (\App\Models\Category::count() == 0) {
+            $this->call(CategorySeeder::class);
+        }
+
+        if (\Modules\Client\Models\Client::count() == 0) {
+            $this->call(ClientSeeder::class);
+        }
+
+        if (\App\Models\Address::count() == 0) {
+            $this->call(AddressSeeder::class);
+        }
+
+        if (\Modules\Product\Models\Product::count() == 0) {
+            $this->call(ProductSeeder::class);
+        }
+
+        if (\App\Models\ShoppingCart::count() == 0) {
+            $this->call(ShoppingCartSeeder::class);
+        }
     }
 }
