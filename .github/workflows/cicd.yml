@@ -53,8 +53,9 @@ jobs:
             sudo unzip -o /tmp/deploy.zip -d .
             sudo rm /tmp/deploy.zip
 
-            echo "� Permissões Iniciais..."
-            sudo chown -R www-data:www-data /var/www/erp-vue-modular            sudo chmod -R 775 storage bootstrap/cache
+            echo "🔐 Permissões Iniciais..."
+            sudo chown -R www-data:www-data /var/www/erp-vue-modular
+            sudo chmod -R 775 storage bootstrap/cache
 
             echo "🗄️ Database & Cache..."
             # Rodamos como sudo -u www-data para garantir que os logs criados pertençam ao dono certo
@@ -67,7 +68,8 @@ jobs:
             sudo -u www-data php artisan storage:link
 
             echo "🔐 Permissões Finais (Assets)..."
-            sudo chown -R www-data:www-data /var/www/erp-vue-modular            sudo chmod -R 775 storage bootstrap/cache public/build
+            sudo chown -R www-data:www-data /var/www/erp-vue-modular
+            sudo chmod -R 775 storage bootstrap/cache public/build
             
             echo "🔄 Reiniciando PHP..."
             sudo systemctl restart php8.3-fpm
