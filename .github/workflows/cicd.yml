@@ -53,13 +53,13 @@ jobs:
             sudo unzip -o /tmp/deploy.zip -d .
             sudo rm /tmp/deploy.zip
 
-            echo "� Configurando .env se não existir..."
+            echo "📝 Configurando .env se não existir..."
             if [ ! -f .env ]; then
               sudo cp .env.example .env
               sudo sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=pgsql/g' .env
               sudo sed -i 's/# DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/g' .env
               sudo sed -i 's/# DB_PORT=3306/DB_PORT=5432/g' .env
-              sudo sed -i 's/# DB_DATABASE=laravel/DB_DATABASE=erp_vue_modular/g' .env
+              sudo sed -i 's/# DB_DATABASE=laravel/DB_DATABASE=erp_vue_laravel/g' .env
               sudo sed -i 's/# DB_USERNAME=root/DB_USERNAME=postgres/g' .env
               sudo sed -i 's/# DB_PASSWORD=/DB_PASSWORD=123456/g' .env
               sudo chown www-data:www-data .env
@@ -70,8 +70,6 @@ jobs:
             sudo chmod -R 775 storage bootstrap/cache
 
             echo "🗄️ Database & Cache..."
-            # Criar banco de dados se não existir
-            sudo -u postgres psql -c "CREATE DATABASE erp_vue_modular;" 2>/dev/null || echo "Banco já existe"
             # Rodamos como sudo -u www-data para garantir que os logs criados pertençam ao dono certo
             sudo -u www-data php artisan migrate:fresh --seed --force
             sudo -u www-data php artisan optimize:clear
