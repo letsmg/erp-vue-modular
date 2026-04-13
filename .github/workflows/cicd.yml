@@ -23,7 +23,6 @@ jobs:
       - name: 📝 Prepare Build Env
         run: |
           cp .env.example .env
-          # Agora o artisan vai funcionar porque a pasta vendor já existe!
           php artisan key:generate
 
       - name: 🟢 Setup Node.js
@@ -38,7 +37,6 @@ jobs:
           npm run build
 
       - name: 🤐 Criar Pacote de Deploy
-        # EXCLUSÃO TOTAL de .env e pastas desnecessárias
         run: zip -r deploy.zip . -x ".git/*" "node_modules/*" ".github/*" "tests/*" ".env*" "storage/*"
 
       - name: 🔑 Configure SSH & Known Hosts
@@ -46,38 +44,46 @@ jobs:
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-          # Agora não precisamos de StrictHostKeyChecking=no
 
       - name: 🚀 Deploy Atômico (Zero Downtime)
         run: |
-          scp deploy.zip ubuntu@${{ secrets.SERVER_IP }}:/tmp/
+          scp deploy.zip ubuntu@${{ secrets.SERVER_IP }}:/tmp/deploy_modular.zip
 
           ssh ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
             set -e
             
-            # 1. Preparar pasta temporária para a nova versão
-            sudo rm -rf /var/www/erp-vue-modular_new
-            sudo mkdir -p /var/www/erp-vue-modular_new
-            sudo unzip -o /tmp/deploy.zip -d /var/www/erp-vue-modular_new
+            # CONFIGURAÇÃO DE CAMINHOS
+            BASE_DIR="/var/www/erp-vue-modular"
             
-            # 2. Linkar o .env e a storage reais do servidor
-            sudo ln -sfn /var/www/erp-vue-modular_shared/.env /var/www/erp-vue-modular_new/.env
-            sudo ln -sfn /var/www/erp-vue-modular_shared/storage /var/www/erp-vue-modular_new/storage
+            # 1. Preparar pasta temporária
+            sudo rm -rf ${BASE_DIR}_new
+            sudo mkdir -p ${BASE_DIR}_new
+            sudo unzip -o /tmp/deploy_modular.zip -d ${BASE_DIR}_new
             
-            # 3. Rodar migrations na pasta nova ANTES de ativar o site
-            cd /var/www/erp-vue-modular_new
-            sudo -u www-data php artisan migrate --seed --force
+            # 2. AJUSTE DE PERMISSÕES ANTECIPADO (Evita erro no storage:link)
+            sudo chown -R www-data:www-data ${BASE_DIR}_new
+            
+            # 3. Linkar arquivos persistentes (Shared)
+            sudo ln -sfn ${BASE_DIR}_shared/.env ${BASE_DIR}_new/.env
+            sudo ln -sfn ${BASE_DIR}_shared/storage ${BASE_DIR}_new/storage
+            
+            # 4. Comandos Laravel (Rodando como www-data)
+            cd ${BASE_DIR}_new
+            
+            # Remove link de storage antigo se existir no pacote zip
+            sudo rm -rf public/storage
+            
+            sudo -u www-data php artisan migrate --force
+            sudo -u www-data php artisan db:seed --force
             sudo -u www-data php artisan storage:link
             sudo -u www-data php artisan optimize
             
-            # 4. SWAP: Troca o site antigo pelo novo (Atômico)
-            # Se algo falhou acima, esse passo nunca acontece e o site não quebra
-            sudo ln -sfn /var/www/erp-vue-modular_new /var/www/erp-vue-modular_live
+            # 5. SWAP ATÔMICO (Ativa a nova versão)
+            sudo ln -sfn ${BASE_DIR}_new ${BASE_DIR}_live
             
-            # 5. Permissões e Cleanup
-            sudo chown -R www-data:www-data /var/www/erp-vue-modular_new
+            # 6. Finalização
             sudo systemctl restart php8.3-fpm
-            sudo rm /tmp/deploy.zip
+            sudo rm /tmp/deploy_modular.zip
             
-            echo "✅ Deploy Atômico Finalizado com Sucesso!"
+            echo "✅ Deploy Atômico Modular Finalizado com Sucesso!"
           EOF
