@@ -62,6 +62,17 @@ const isPromoActive = computed(() => {
     return true;
 });
 
+// Verifica se promoção está ativa para um item específico
+const isPromoActiveForItem = (item) => {
+    if (!item.promo_price) return false;
+    const now = new Date();
+    const start = item.promo_start_at ? new Date(item.promo_start_at) : null;
+    const end = item.promo_end_at ? new Date(item.promo_end_at) : null;
+    if (start && now < start) return false;
+    if (end && now > end) return false;
+    return true;
+};
+
 const getImageUrl = (path) => {
     if (!path) return null;
     // Garante que não duplique "products/products/"
@@ -260,7 +271,9 @@ const formatCurrency = (value) => {
                                     <Globe v-else class="w-12 h-12 text-gray-100" />
                                 </div>
                                 <p class="text-[11px] font-black uppercase tracking-tight truncate px-2" :class="theme === 'dark' ? 'text-white' : 'text-gray-900'">{{ item.title }}</p>
-                                <div class="text-sm font-black text-indigo-600 mt-1 px-2">{{ formatCurrency(item.sale_price) }}</div>
+                                <div class="text-sm font-black mt-1 px-2" :class="item.promo_price && isPromoActiveForItem(item) ? 'text-red-600' : (theme === 'dark' ? 'text-white' : 'text-gray-900')">
+                                    {{ formatCurrency(item.current_price || item.sale_price) }}
+                                </div>
                             </Link>
                         </div>
                     </div>
