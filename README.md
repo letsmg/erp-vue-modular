@@ -380,7 +380,7 @@ Database example:
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_DATABASE=erp_vue_laravel
+DB_DATABASE=erp_vue_modular
 DB_USERNAME=postgres
 DB_PASSWORD=123456
 ```

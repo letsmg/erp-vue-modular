@@ -13,37 +13,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Só roda os seeders se as tabelas estiverem vazias
-        if (\Modules\User\Models\User::count() == 0) {
-            $this->call(SingleUserSeeder::class);
-        }
+        // Roda SingleUserSeeder primeiro (cria admin se não existir)
+        $this->call(SingleUserSeeder::class);
 
-        if (\Modules\User\Models\User::count() < 6) {
-            $this->call(UserSeeder::class);
-        }
+        // Roda UserSeeder (cria usuários adicionais)
+        $this->call(UserSeeder::class);
 
-        if (\Modules\Supplier\Models\Supplier::count() == 0) {
-            $this->call(SupplierSeeder::class);
-        }
+        // Roda SupplierSeeder
+        $this->call(SupplierSeeder::class);
 
-        if (\App\Models\Category::count() == 0) {
-            $this->call(CategorySeeder::class);
-        }
+        // Roda CategorySeeder
+        $this->call(CategorySeeder::class);
 
-        if (\Modules\Client\Models\Client::count() == 0) {
-            $this->call(ClientSeeder::class);
-        }
+        // Roda ClientSeeder
+        $this->call(ClientSeeder::class);
 
-        if (\App\Models\Address::count() == 0) {
-            $this->call(AddressSeeder::class);
-        }
+        // Roda AddressSeeder
+        $this->call(AddressSeeder::class);
 
-        if (\Modules\Product\Models\Product::count() == 0) {
-            $this->call(ProductSeeder::class);
-        }
+        // Roda ProductSeeder
+        $this->call(ProductSeeder::class);
 
-        if (\App\Models\ShoppingCart::count() == 0) {
-            $this->call(ShoppingCartSeeder::class);
-        }
+        // Roda ShoppingCartSeeder
+        $this->call(ShoppingCartSeeder::class);
     }
 }

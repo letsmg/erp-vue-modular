@@ -27,7 +27,7 @@ class ProductTest extends TestCase
             'access_level' => AccessLevel::CLIENT
         ]);
 
-        $this->actingAs($admin)->get('/api/v1/products', ['Accept' => 'application/json'])->assertStatus(200);
+        $response = $this->actingAs($admin)->get('/api/v1/products', ['Accept' => 'application/json'])->assertStatus(200);
         $this->actingAs($operator)->get('/api/v1/products', ['Accept' => 'application/json'])->assertStatus(200);
         
         // Client não tem acesso - verifica se retorna 403
@@ -113,7 +113,7 @@ class ProductTest extends TestCase
         $response = $this->actingAs($operator)
             ->withSession(['_token' => 'test'])
             ->put('/api/v1/products/' . $product->id, [
-            'description' => 'Descricao Alterada',
+            'title' => 'Titulo Alterado',
             'is_active' => true, // Tentando burlar
             '_token' => 'test',
         ], ['Accept' => 'application/json']);

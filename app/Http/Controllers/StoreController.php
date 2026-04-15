@@ -35,13 +35,33 @@ class StoreController extends Controller
         // Carrega relações
         $product->load(['images', 'seo']);
 
-        // Produtos relacionados
+        // Produtos semelhantes por categoria
         $relatedProducts = Product::with('images')
-            ->where('brand', $product->brand)
+            ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)
-            ->limit(4)
+            ->limit(8)
             ->get();
+
+        // Fallback: se não houver produtos na mesma categoria, buscar por marca
+        if ($relatedProducts->isEmpty()) {
+            $relatedProducts = Product::with('images')
+                ->where('brand', $product->brand)
+                ->where('id', '!=', $product->id)
+                ->where('is_active', true)
+                ->limit(8)
+                ->get();
+        }
+
+        // Fallback: se ainda não houver produtos, buscar produtos aleatórios
+        if ($relatedProducts->isEmpty()) {
+            $relatedProducts = Product::with('images')
+                ->where('id', '!=', $product->id)
+                ->where('is_active', true)
+                ->inRandomOrder()
+                ->limit(8)
+                ->get();
+        }
 
         return Inertia::render('Store/Show', [
             'product' => $product,

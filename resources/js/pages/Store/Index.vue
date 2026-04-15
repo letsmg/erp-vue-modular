@@ -157,8 +157,8 @@ const sortOptions = [
     { value: 'sale_price_asc', label: 'Menor preço' },
     { value: 'sale_price_desc', label: 'Maior preço' },
     { value: 'promo_price_asc', label: 'Melhores promoções' },
-    { value: 'description_asc', label: 'Nome (A-Z)' },
-    { value: 'description_desc', label: 'Nome (Z-A)' },
+    { value: 'title_asc', label: 'Nome (A-Z)' },
+    { value: 'title_desc', label: 'Nome (Z-A)' },
     { value: 'created_at_asc', label: 'Mais antigos' },
 ];
 
@@ -212,11 +212,11 @@ const scroll = (id, direction) => {
                             class="w-full h-full object-cover opacity-100 transition-transform duration-1000 group-hover:scale-110 lazyload"
                             style="backface-visibility: hidden; transform: translateZ(0);"
                             loading="lazy" 
-                            :alt="p.description" />
+                            :alt="p.title" />
                         
                         <div class="absolute inset-0 flex flex-col justify-end md:justify-center px-6 md:px-8 text-white bg-gradient-to-t md:bg-gradient-to-r from-black/80 via-black/50 to-transparent pb-6 md:pb-0">
                             <span class="bg-primary w-fit px-3 py-1 rounded-full text-[9px] font-black uppercase mb-2 md:mb-3 tracking-[0.15em]">Destaque</span>
-                            <h2 class="text-lg md:text-2xl font-black mb-2 tracking-tight leading-tight max-w-md uppercase italic line-clamp-2">{{ p.description }}</h2>
+                            <h2 class="text-lg md:text-2xl font-black mb-2 tracking-tight leading-tight max-w-md uppercase italic line-clamp-2">{{ p.title }}</h2>
                             <p class="text-lg md:text-xl text-primary-hover mb-3 md:mb-4 font-mono font-bold">R$ {{ p.sale_price }}</p>
                             
                             <Link :href="route('store.product', p.slug)" 
@@ -313,7 +313,7 @@ const scroll = (id, direction) => {
                                     : 'https://placehold.co/600x800'" 
                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 lazyload"
                                 loading="lazy"
-                                :alt="product.description"
+                                :alt="product.title"
                             />
 
                             <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
@@ -325,7 +325,7 @@ const scroll = (id, direction) => {
 
                         <div class="px-3">
                             <h3 class="text-xs md:text-sm font-black uppercase truncate text-slate-800 tracking-tight">
-                                {{ product.description }}
+                                {{ product.title }}
                             </h3>
 
                             <div class="flex items-center justify-between mt-2">

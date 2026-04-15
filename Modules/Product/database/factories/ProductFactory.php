@@ -17,7 +17,10 @@ class ProductFactory extends Factory
         return [
             'supplier_id'    => Supplier::factory(),
             'category_id'    => Category::factory(),
-            'description'    => ucfirst($this->faker->words(3, true)),
+            'title'          => ucfirst($this->faker->words(3, true)),
+            'subtitle'       => $this->faker->sentence(),
+            'description'    => $this->faker->paragraph(),
+            'features'       => $this->faker->paragraph(),
             'brand'          => $this->faker->company(),
             'model'          => $this->faker->bothify('??-###'),
             'size'           => $this->faker->randomElement(['P', 'M', 'G', 'GG']),
@@ -40,9 +43,8 @@ class ProductFactory extends Factory
     {
         return $this->afterCreating(function (Product $product) {
             $product->seo()->create([
-                'meta_description' => "Compre " . $product->description . " com as melhores condições.",
+                'meta_description' => "Compre " . $product->title . " com as melhores condições.",
                 'meta_keywords'    => implode(',', $this->faker->words(5)),
-                'text1'            => $this->faker->paragraph(),
             ]);
         });
     }

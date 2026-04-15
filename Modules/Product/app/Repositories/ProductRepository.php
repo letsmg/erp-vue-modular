@@ -13,29 +13,20 @@ class ProductRepository
      */
     public function getFiltered(array $filters)
     {
-        // Debug inicial
-        \Log::info('=== INÍCIO getFiltered ===');
-        \Log::info('Filters recebidos: ' . json_encode($filters));
-
         $query = Product::query()
             ->with(['supplier:id,company_name', 'images' => function($q) {
                 $q->orderBy('order', 'asc');
             }]);
 
-        // Debug: contar produtos antes dos filtros
-        $totalBefore = $query->count();
-        \Log::info('Total de produtos antes dos filtros: ' . $totalBefore);
-
         // Ordenação - padrão é ordem alfabética
-        $sortBy = $filters['sort'] ?? 'description_asc';
-        \Log::info('Sort by: ' . $sortBy);
+        $sortBy = $filters['sort'] ?? 'title_asc';
         
         switch ($sortBy) {
-            case 'description_asc':
-                $query->orderBy('description', 'asc');
+            case 'title_asc':
+                $query->orderBy('title', 'asc');
                 break;
-            case 'description_desc':
-                $query->orderBy('description', 'desc');
+            case 'title_desc':
+                $query->orderBy('title', 'desc');
                 break;
             case 'sale_price_asc':
                 $query->orderBy('sale_price', 'asc');
@@ -56,7 +47,7 @@ class ProductRepository
                 $query->orderBy('created_at', 'desc');
                 break;
             default:
-                $query->orderBy('description', 'asc');
+                $query->orderBy('title', 'asc');
                 break;
         }
 
@@ -64,59 +55,49 @@ class ProductRepository
 
         // 1. Filtro de Status (blocked/active) - mutuamente exclusivos
         if (isset($filters['blocked']) && $filters['blocked'] == 1) {
-            \Log::info('Aplicando filtro blocked = 1');
             $query->where('is_active', false);
         } elseif (isset($filters['active']) && $filters['active'] == 1) {
-            \Log::info('Aplicando filtro active = 1');
             $query->where('is_active', true);
         }
 
         // 2. Filtros Avançados
         if (!empty($filters['brand'])) {
-            \Log::info('Aplicando filtro brand: ' . $filters['brand']);
             $query->where('brand', $filters['brand']);
         }
 
         if (!empty($filters['model'])) {
-            \Log::info('Aplicando filtro model: ' . $filters['model']);
             $query->where('model', 'like', '%' . $filters['model'] . '%');
         }
 
         if (!empty($filters['category_id']) && is_numeric($filters['category_id'])) {
-            \Log::info('Aplicando filtro category_id: ' . $filters['category_id']);
             $query->where('category_id', $filters['category_id']);
         }
 
         if (!empty($filters['price_min']) && is_numeric($filters['price_min'])) {
-            \Log::info('Aplicando filtro price_min: ' . $filters['price_min']);
             $query->where('sale_price', '>=', (float) $filters['price_min']);
         }
         if (!empty($filters['price_max']) && is_numeric($filters['price_max'])) {
-            \Log::info('Aplicando filtro price_max: ' . $filters['price_max']);
             $query->where('sale_price', '<=', (float) $filters['price_max']);
         }
 
         if (!empty($filters['stock_min']) && is_numeric($filters['stock_min'])) {
-            \Log::info('Aplicando filtro stock_min: ' . $filters['stock_min']);
             $query->where('stock_quantity', '>=', (int) $filters['stock_min']);
         }
         if (!empty($filters['stock_max']) && is_numeric($filters['stock_max'])) {
-            \Log::info('Aplicando filtro stock_max: ' . $filters['stock_max']);
             $query->where('stock_quantity', '<=', (int) $filters['stock_max']);
         }
 
         // 3. Busca por Texto (melhorada)
         if (!empty($filters['search'])) {
             $search = trim($filters['search']);
-            \Log::info('Aplicando filtro search: ' . $search);
-            
+
             $query->where(function ($q) use ($search) {
-                // Busca por descrição, marca e modelo
+                // Busca por título, marca e modelo
                 $searchTerm = "%{$search}%";
                 $q->where(function ($sub) use ($searchTerm) {
-                    $sub->whereRaw("unaccent(description) ilike unaccent(?)", [$searchTerm])
-                       ->orWhereRaw("unaccent(brand) ilike unaccent(?)", [$searchTerm])
-                       ->orWhereRaw("unaccent(model) ilike unaccent(?)", [$searchTerm]);
+                    $sub->where('title', 'ilike', $searchTerm)
+                       ->orWhere('brand', 'ilike', $searchTerm)
+                       ->orWhere('model', 'ilike', $searchTerm);
                 });
 
                 // Busca por preço (se for numérico)
@@ -130,21 +111,8 @@ class ProductRepository
             });
         }
 
-        // Debug: contar produtos depois dos filtros
-        $totalAfter = $query->count();
-        \Log::info('Total de produtos depois dos filtros: ' . $totalAfter);
-
-        // Log da query SQL para debug
-        \Log::info('SQL Query: ' . $query->toSql());
-        \Log::info('Query Bindings: ' . json_encode($query->getBindings()));
-
         // Importante: usamos withQueryString para manter os filtros ao trocar de página
         $result = $query->paginate(12)->withQueryString();
-        
-        // Log do resultado
-        \Log::info('Total products found: ' . $result->total());
-        \Log::info('Products on current page: ' . $result->count());
-        \Log::info('=== FIM getFiltered ===');
         
         return $result;
     }
@@ -196,7 +164,7 @@ class ProductRepository
         $data['is_active'] = ($user && $user->access_level == 1);
 
         // 3. Criamos uma lista com os campos que pertencem à tabela 'seos'
-        $seoFields = ['meta_title', 'meta_description', 'meta_keywords', 'h1', 'text1'];
+        $seoFields = ['meta_description', 'meta_keywords'];
         
         // 4. O SEGREDO: Criamos um array excluindo os campos de SEO
         // Isso evita que o SQL tente inserir 'meta_title' na tabela 'products'
@@ -225,11 +193,11 @@ class ProductRepository
 
         // 2. Campos que permitimos atualizar via request
         $productFields = [
-            'description', 'supplier_id', 'barcode', 'brand', 'model', 
+            'title', 'subtitle', 'description', 'features', 'supplier_id', 'barcode', 'brand', 'model',
             'collection', 'size', 'gender', 'stock_quantity', 'slug',
-            'cost_price', 'sale_price', 'promo_price', 'promo_start_at', 
+            'cost_price', 'sale_price', 'promo_price', 'promo_start_at',
             'promo_end_at', 'weight', 'width', 'height', 'length', 'free_shipping',
-            'is_active' 
+            'is_active'
         ];
 
         $filteredData = collect($data)->only($productFields)->toArray();

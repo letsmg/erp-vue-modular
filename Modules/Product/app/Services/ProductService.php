@@ -26,7 +26,7 @@ class ProductService
     {
         return DB::transaction(function () use ($data, $request) {
 
-            $data['slug'] = $this->generateSlug($data['description'] ?? '');
+            $data['slug'] = $this->generateSlug($data['title'] ?? '');
 
             $product = $this->repository->create($data);
 
@@ -113,8 +113,8 @@ class ProductService
     private function syncSeo($product, array $input)
     {
         $seoFields = [
-            'meta_title', 'meta_description', 'meta_keywords',
-            'h1', 'text1', 'h2', 'text2', 'schema_markup', 'google_tag_manager',
+            'meta_description', 'meta_keywords',
+            'schema_markup', 'google_tag_manager',
         ];
 
         $data = collect($input)->only($seoFields)->toArray();

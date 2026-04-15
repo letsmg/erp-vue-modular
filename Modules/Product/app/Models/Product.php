@@ -20,8 +20,8 @@ class Product extends Model
     }
         
     protected $fillable = [
-        'supplier_id','category_id', 'description', 'brand', 'model', 'size', 
-        'collection', 'gender', 'cost_price', 'sale_price', 
+        'supplier_id','category_id', 'title', 'subtitle', 'description', 'features', 'brand', 'model', 'size',
+        'collection', 'gender', 'cost_price', 'sale_price',
         'promo_price', 'promo_start_at', 'promo_end_at',
         'barcode', 'stock_quantity', 'is_active', 'is_featured',
         'slug',
@@ -54,14 +54,14 @@ class Product extends Model
         // Criar slug automaticamente
         static::creating(function ($product) {
             if (!$product->slug) {
-                $product->slug = self::generateUniqueSlug($product->description);
+                $product->slug = self::generateUniqueSlug($product->title);
             }
         });
 
-        // Atualizar slug se descrição mudar (opcional 🔥)
+        // Atualizar slug se título mudar (opcional 🔥)
         static::updating(function ($product) {
-            if ($product->isDirty('description')) {
-                $product->slug = self::generateUniqueSlug($product->description);
+            if ($product->isDirty('title')) {
+                $product->slug = self::generateUniqueSlug($product->title);
             }
         });
 
@@ -135,10 +135,8 @@ class Product extends Model
         $seo = $this->seo;
 
         return [
-            'meta_title'       => $seo?->meta_title ?: $this->description,
-            'meta_description' => $seo?->meta_description ?: "Confira {$this->description} com o melhor preço na nossa loja.",
-            'h1'               => $seo?->h1 ?: $this->description,
-            'meta_keywords'    => $seo?->meta_keywords ?: str_replace(' ', ', ', $this->description),
+            'meta_description' => $seo?->meta_description ?: "Confira {$this->title} com o melhor preço na nossa loja.",
+            'meta_keywords'    => $seo?->meta_keywords ?: str_replace(' ', ', ', $this->title),
             'slug'             => $this->slug,
             'canonical_url'    => config('app.url') . '/store/product/' . $this->slug,
         ];
